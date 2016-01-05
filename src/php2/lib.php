@@ -1,1 +1,0 @@
-LIXO, ver omLib.php
