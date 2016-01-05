@@ -17,7 +17,43 @@
   ],
   "resources": [
     {
-      "name": "families.csv",
+      "name": "scopes",
+      "path": "data/scopes.csv",
+      "mediatype": "text/csv",
+      "schema": {
+        "fields": [
+          {
+            "name": "scope",
+            "role": "pk",
+            "type": "string",
+            "description": "Label of the scope of families"
+          },
+          {
+            "name": "scope_id",
+            "role": "master",
+            "type": "integer",
+            "description": "alternative PK and indexer of the scopes"
+          },
+         {
+            "name": "name",
+            "type": "string",
+            "description": "Full name (title) of the scope"
+          },
+         {
+            "name": "url_ref",
+            "type": "string",
+            "description": "URL of a scope reference, showing how to inffer valid licenses of that scope"
+          },
+         {
+            "name": "notes",
+            "type": "string",
+            "description": "notices about grouping families or licenses in the scope"
+          }
+        ]
+      }
+    },
+    {
+      "name": "families",
       "path": "data/families.csv",
       "mediatype": "text/csv",
       "schema": {
