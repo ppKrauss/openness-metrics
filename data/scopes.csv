@@ -1,0 +1,4 @@
+scope,scope_id,name,url_ref,notes
+od,1,Open Definition,http://opendefinition.org/,any OD
+oa,2,Open Access,https://doaj.org/faq#seal,OA but not OD
+rt,3,(copyright) Restricted,,"non-oa and non-od, see implicit Berna Convention and others"

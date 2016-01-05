@@ -1,0 +1,60 @@
+{
+  "title": "Openness Metrics",
+  "name": "openness-metrics",
+  "description": "Licenses dataset complements and mini-framework for Openness Metrics.",
+  "sources": [
+     {
+      "name":"Open Definition Licenses Service",
+      "web": "http://licenses.opendefinition.org"
+     }
+   ],
+  "licenses": [
+    {
+      "url": "http://www.opendefinition.org/licenses/odc-pddl",
+      "title": "Open Data Commons Public Domain Dedication and Licence 1.0",
+      "id": "ODC-PDDL-1.0"
+    }
+  ],
+  "resources": [
+    {
+      "name": "families.csv",
+      "path": "data/families.csv",
+      "mediatype": "text/csv",
+      "schema": {
+        "fields": [
+          {
+            "name": "family",
+            "role": "pk",
+            "type": "string",
+            "description": "Label of the canonic license. The '*' is added to indicate any other clause valid as Acceptable Conditions by the OpenDefinition"
+          },
+          {
+            "name": "scope",
+            "type": "string",
+            "description": "Family aggregation into OD (OpenDefinition), OA (OpenAccess non-OD) and RT (restrictive)"
+          },
+          {
+            "name": "sort",
+            "type": "integer",
+            "description": "sort order (can be used also as an arbitrary 'openness degree')"
+          },
+          {
+            "name": "degreeV1",
+            "type": "integer",
+            "description": "Version 1 of a 'openess dregree' rank in the family set"
+          },
+          {
+            "name": "degreeV2",
+            "type": "integer",
+            "description": "Version 2 of a 'openess dregree' rank in the family set"
+          },
+          {
+            "name": "degreeV3",
+            "type": "integer",
+            "description": "Version 3 of a 'openess dregree' rank in the family set"
+          }
+        ]
+      }
+    }
+  ]
+}
