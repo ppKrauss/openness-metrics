@@ -51,9 +51,15 @@ require_once 'omLib.php';
 
 <body>
 
+<div style="float:right">
+	<img width="320" src="../assets/open2d2.png">
+	<br/>
+	<img width="620" src="../assets/hoii-guide-OAdegreeTable.png">
+</div>
+
 <?php echo set_OpenMetricsBox(
 	['DOAJ','pt','DOAJ Seal 2015', 
-	 'As <i>licenças default</i> utilizadas pelas 5302 revistas certificadas do diretório DOAJ de revistas OpenAccess 
+	 'As <i>licenças default</i> utilizadas pelas <a target="_blank" href="https://doaj.org/search?source=%7B%22query%22%3A%7B%22filtered%22%3A%7B%22filter%22%3A%7B%22bool%22%3A%7B%22must%22%3A%5B%7B%22term%22%3A%7B%22_type%22%3A%22journal%22%7D%7D%2C%7B%22term%22%3A%7B%22index.has_seal.exact%22%3A%22Yes%22%7D%7D%5D%7D%7D%2C%22query%22%3A%7B%22match_all%22%3A%7B%7D%7D%7D%7D%2C%22sort%22%3A%5B%7B%22created_date%22%3A%7B%22order%22%3A%22desc%22%7D%7D%5D%2C%22from%22%3A0%2C%22size%22%3A10%7D#.VowgonUrI8o">5302 revistas certificadas do diretório DOAJ</a> de revistas OpenAccess 
 	 serviram de fonte uniforme (igual peso independente da revista) para a caracterização do DOAJ.  
 	 A maior parte das revistas, 5196, declararam licenças conhecidas: 50% apresentaram licença da família CC­-BY, 
 	 2% família CC­-BY­-SA, ou seja, 52% (2702 revistas) apresentaram licenças Open Definition.'
@@ -65,7 +71,7 @@ require_once 'omLib.php';
 <p>&nbsp;</p>
 <?php echo set_OpenMetricsBox(
 	['scieloBR','pt','SciELO-BR 2015',
-	 'AS licenças default utilizadas pelas 343 revistas são CC-BY-NC-v4, 83%; CC-BY-v4, 14%; e CC-BY-NC-ND-v4, 3%.'
+	 'AS licenças default utilizadas pelas <a target="_blank" href="http://www.scielo.br/scielo.php?script=sci_alphabetic&lng=pt&nrm=iso">343 revistas</a> são CC-BY-NC-v4, 83%; CC-BY-v4, 14%; e CC-BY-NC-ND-v4, 3%.'
 	],
 	['oa'=>86, 'od'=>14],
 	['od'=>6, 'oa'=>2.9], '480', true, 200
@@ -78,9 +84,9 @@ require_once 'omLib.php';
 <p>&nbsp;</p>
 <?php echo set_OpenMetricsBox(['demo2','en','Repo Tal2','blabla inglês bla blablabla blabla bla bla blabla'], ['od'=>55, 'oa'=>45], ['od'=>5, 'oa'=>3], '480', true, 200); ?>
 
+
 <hr/>
 
-<img src="../assets/hoii-guide-OAdegreeTable.png">
 
 </body>
 </html>

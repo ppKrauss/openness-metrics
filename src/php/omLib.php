@@ -217,16 +217,16 @@ function set_OpenMetricsBox(
 			"média ponderada", "dos itens apresentam licenças", "entre eles o grau de abertura médio é",
 			"relatório, clique aqui para abrir/esconder",
 			"METODOLOGIA: este relatório faz uso das", "Através de procedimentos em banco de dados as licenças dos itens são associadas a famílias de licença (nas quais o grau de abertura tem valor consensual), e então as famílias agrupadas em",
-			"escopos", "A cada escopo é calculado o grau de abertura médio das famílias, podenderando-se pela quantidade de itens de cada família. Por fim é calculada a",
-			"entre os escopos"
+			"escopos", "A cada escopo é calculado o grau de abertura médio das famílias, podenderando-se pela quantidade de itens de cada família. Por fim é calculada a", //9
+			"entre os escopos", "grau de abertura", // 11
 		], 
-		'en'=>["Conventions v$vStd of the openness degree metric of a set of documents",
-			"weighted average of the openness degrees",
-			"weighted average",  "of the items offer licenses", "among them the average degree of openness is",
-			"report, click here to hide/show it",
-			"METHODOLOGY: this report makes use of", "Through procedures in database licenses of the items are associated with license families (in which the degree of openness has agreed amount), and then the families grouped into",
-			"scopes", "With each scope is calculated the average degree of openness of the families, weighting by the amount of items in each family. Finally is calculated the",
-			"between scopes"
+		'en'=>["Conventions v$vStd of the openness degree metric of a set of documents", //0
+			"weighted average of the openness degrees", //1
+			"weighted average",  "of the items offer licenses", "among them the average degree of openness is", //4
+			"report, click here to hide/show it", //5
+			"METHODOLOGY: this report makes use of", "Through procedures in database licenses of the items are associated with license families (in which the degree of openness has agreed amount), and then the families grouped into", //7
+			"scopes", "With each scope is calculated the average degree of openness of the families, weighting by the amount of items in each family. Finally is calculated the", //9 
+			"between scopes", "openness degree", // 11
 		],
 	];
 	$is_explode=false;
@@ -245,7 +245,7 @@ function set_OpenMetricsBox(
 		$vals[$k] = $v;
 	}
 	$n_vals = count($vals);
-	$avg = round($avg/$avg_tot,1);
+	$avg = round($avg/($avg_tot*10),1);
 
 	$GG = set_graph_3slices($vals, $vLabel, $is_float, $is_explode, $no_label, $gbox_w, $gbox_h);
 
@@ -261,7 +261,7 @@ function set_OpenMetricsBox(
 				.$GG
 			.'</td>'
 			."\n<td colspan='$n_vals' align='center'>"
-			   ."<b>$title</b>, <i>grau de abertura</i>"
+			   ."<b>$title</b>, <i>$lmsg[11]</i>"
 			   ."" // old
 			   .'</td>'
 			.'</tr>';

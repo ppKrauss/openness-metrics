@@ -55,42 +55,93 @@ CREATE VIEW om.licenses_full AS
   FROM om.licenses l LEFT JOIN om.license_families f ON lic_family=f.fam_id;
 
 
--- --- --- --- --- --- --- --- --- --- --- --- ---
--- PUBLIC JSONB UTIL FUNCTIONS for pg9.4
--- see http://stackoverflow.com/q/34579758/287948
+-- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+-- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- 
+-- SPECIFIC FUNCS:BEGIN
+-- Orthogonal set of functions for microservices and utilities.
+--
 
+-- --- --- --- --- --- --- --- --- --- --- --- --- ---
+-- SPECIFIC FUNCS, family name handlers v1.0 (all tested!)
 
-CREATE OR REPLACE FUNCTION jbval_to_numeric(JSONB, varchar) RETURNS numeric AS $f$
-  SELECT CASE 
-    WHEN jsonb_typeof($1->$2)='number' THEN ($1->>$2)::numeric
-    ELSE NULL::numeric 
-  END;
+CREATE FUNCTION om.famname_format(
+  -- 
+  -- Sanitize and normalize a family's name "free string".
+  -- Example: SELECT om.famname_format('CC BY-NC-ND');
+  --
+  text              -- free name
+  ) RETURNS text AS $f$
+      WITH t AS ( SELECT trim($1) as freename )
+      SELECT CASE 
+               WHEN freename is null OR freename='' THEN NULL 
+               ELSE trim( lower(regexp_replace(freename, '[\- _]+', '-', 'g')), '-' )
+             END
+      FROM t;
 $f$ LANGUAGE sql IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION jbval_to_float(JSONB, varchar) RETURNS float AS $f$
-  SELECT CASE 
-    WHEN jsonb_typeof($1->$2)='number' THEN ($1->>$2)::float
-    ELSE NULL::float
-  END;
+CREATE FUNCTION om.famname_to_id(
+  -- 
+  -- Get family internal ID (or NULL when not found) from family name.
+  --
+  text              -- free name
+  ) RETURNS int AS $f$
+    SELECT fam_id FROM om.license_families WHERE om.famname_format($1)=fam_name;
 $f$ LANGUAGE sql IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION jbval_to_int(JSONB, varchar, boolean DEFAULT true) 
-RETURNS int AS $f$
-  SELECT CASE 
-    WHEN jsonb_typeof($1->$2)='number' THEN 
-       CASE WHEN $3 THEN ($1->>$2)::int ELSE ($1->>$2)::float::int END
-    ELSE NULL::int
-  END;
-$f$ LANGUAGE sql IMMUTABLE;
-
-CREATE OR REPLACE FUNCTION jbval_to_boolean(JSONB, varchar) RETURNS boolean AS $f$
-  SELECT CASE 
-    WHEN jsonb_typeof($1->$2)='boolean' THEN ($1->>$2)::boolean
-    ELSE NULL::boolean 
-  END;
+CREATE FUNCTION om.famname_to_info(
+  -- 
+  -- Get full information (or NULL when not found) from family name.
+  -- Example: SELECT om.famname_to_info('cc  BY'); 
+  --
+  text              -- free name
+  ) RETURNS JSON AS $f$
+    SELECT row_to_json(t)
+    FROM (  SELECT * FROM om.license_families WHERE om.famname_format($1)=fam_name  ) t;
 $f$ LANGUAGE sql IMMUTABLE;
 
 
+
+-- --- --- --- --- --- --- --- --- --- --- --- --- ---
+-- SPECIFIC FUNCS, family name list handlers v1.0 (all tested!)
+
+CREATE FUNCTION om.famnames_to_ids( text[] ) RETURNS int[] AS $f$
+        -- Example: select om.famnames_to_ids('{cc0,cc-by-nc}'::text[]);
+	WITH lst AS (SELECT unnest($1) as fname)
+	SELECT array_agg(lf.fam_id)
+	FROM lst LEFT JOIN om.license_families lf ON om.famname_format(fname)=fam_name;
+$f$ LANGUAGE sql IMMUTABLE;
+
+
+-- --- --- --- --- --- --- --- --- --- --- --- --- ---
+-- SPECIFIC FUNCS, other family handlers v1.0 (all tested!)
+
+CREATE FUNCTION om.fam_to_info(int) RETURNS JSON AS $f$
+    -- info from ID
+    SELECT row_to_json(t)
+    FROM (  SELECT * FROM om.license_families WHERE $1=fam_id  ) t;
+$f$ LANGUAGE sql IMMUTABLE;
+
+
+CREATE OR REPLACE FUNCTION om.famqts_to_records( JSON ) RETURNS JSON[] AS $f$
+	-- funcao EXPERIMENTAL... sem maior utilidade.
+        -- Example: select om.famqts_to_records('{"CC-BY":696771,"CC-BY-NC":371520}'::json);
+        SELECT array_agg( row_to_json(tt) ) FROM (
+		WITH lst AS ( SELECT key AS fname, value as qt FROM json_each_text($1) )
+		SELECT lf.fam_id, fam_name, qt::int, kx_vec
+		FROM lst LEFT JOIN om.license_families lf ON om.famname_format(fname)=fam_name
+	) tt;
+$f$ LANGUAGE sql IMMUTABLE;
+
+
+CREATE FUNCTION om.famnames_to_degree( text[], int ) RETURNS int[] AS $f$
+        -- Example: select om.famnames_to_degree( '{cc0,cc-by-nc,cc by}'::text[] , 2);
+	WITH lst AS (SELECT unnest($1) as fname)
+	SELECT array_agg( COALESCE(kx_vec[$2][1],0) + COALESCE(kx_vec[$2][2],0) + COALESCE(kx_vec[$2][3],0) )
+	FROM lst LEFT JOIN om.license_families lf ON om.famname_format(fname)=fam_name;
+$f$ LANGUAGE sql IMMUTABLE;
+
+
+-- --- --- --- --- --- --- --- --- --- --- --- --- ---
 -- --- --- --- --- --- --- --- --- --- --- --- --- ---
 -- SPECIFIC FUNCS, licname handlers v1.0 (all tested!)
 
@@ -149,7 +200,7 @@ CREATE FUNCTION om.licname_to_id(
     SELECT lic_id FROM om.licenses_full WHERE om.licname_cmp(lic_id_name,$1,$2);
 $f$ LANGUAGE sql IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION om.licname_to_info(
+CREATE FUNCTION om.licname_to_info(
   -- 
   -- Get full information (or NULL when not found) from lincense name.
   -- Example: SELECT om.licname_get_info('CC-BY-NC4'); 
@@ -161,6 +212,10 @@ CREATE OR REPLACE FUNCTION om.licname_to_info(
     FROM (  SELECT * FROM om.licenses_full WHERE om.licname_cmp(lic_id_name,$1,$2)  ) t;
 $f$ LANGUAGE sql IMMUTABLE;
 
+CREATE FUNCTION om.lic_to_info(int) RETURNS JSON AS $f$
+    SELECT row_to_json(t)
+    FROM (  SELECT * FROM om.licenses_full WHERE lic_id=$1  ) t;
+$f$ LANGUAGE sql IMMUTABLE;
 
 -- --- --- --- --- --- --- --- --- --- --- --- --- ---
 -- SPECIFIC FUNCS, licnameS handlers v1.0 (all tested!)
@@ -184,7 +239,7 @@ $f$ LANGUAGE sql IMMUTABLE;
 
 CREATE TYPE om.licget_idqt_aux AS (name varchar, qt int);
 
-CREATE OR REPLACE FUNCTION om.nameqt_to_idqt(
+CREATE FUNCTION om.nameqt_to_idqt(
   -- 
   -- Get license internal IDs from lincense names+quantities in a JSON array of objects [{name,qt}].
   -- Example: SELECT  om.nameqt_to_idqt('[{"name":"Apache 2","qt":32},{"name":"CC-BY-3","qt":2}]'::JSON);
@@ -208,7 +263,7 @@ CREATE FUNCTION om.scope_idx(varchar) RETURNS int AS $f$
   SELECT CASE lower($1) WHEN 'od' THEN 1 WHEN 'oa' THEN 2 ELSE 3 END; 
 $f$ LANGUAGE sql IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION om.scope_count_bylicenseids(
+CREATE FUNCTION om.scope_count_bylicenseids(
   -- 
 
 -- FALTA REVER
@@ -232,7 +287,7 @@ CREATE OR REPLACE FUNCTION om.scope_count_bylicenseids(
 $f$ LANGUAGE sql IMMUTABLE;
 
 
-CREATE OR REPLACE FUNCTION om.family_count_bylicenseids(
+CREATE FUNCTION om.family_count_bylicenseids(
   -- 
   -- Sum counts over license families. Count for each family, and calculate total itens of that family.
   -- FALTA NULL listar as licenças não-encontradas.
@@ -254,7 +309,7 @@ CREATE OR REPLACE FUNCTION om.family_count_bylicenseids(
 		) as tt;
 $f$ LANGUAGE sql IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION om.family_count_bylicenseids(
+CREATE FUNCTION om.family_count_bylicenseids(
   -- 
   -- Do om.scope_count_bylicenseids(int[]) from JSON array of {name,qt}  or {lic_id,qt} (qt=1 when not exist).
   -- Example-1: SELECT om.family_count_bylicenseids( '[{"name":"CC-by2","qt":32},{"name":"CC-BY-v3","qt":5}]'::JSON );
@@ -270,6 +325,10 @@ CREATE OR REPLACE FUNCTION om.family_count_bylicenseids(
 $f$ LANGUAGE sql IMMUTABLE;
 
 
+--
+-- SPECIFIC FUNCS:END
+-- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+-- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 -- -- -- -- --
 -- MANUT VIEWS
@@ -303,7 +362,7 @@ CREATE VIEW om.manut2_suspect_repetition AS
 -- TRIGGERS
 
 
-CREATE OR REPLACE FUNCTION om.license_families_refresh() RETURNS trigger AS $script$
+CREATE FUNCTION om.license_families_refresh() RETURNS trigger AS $script$
     --
     -- Cache refresh
     -- NOTE: the kx_vec updates need to check conventions and how many degreeN are defined.
@@ -342,7 +401,7 @@ CREATE TRIGGER license_families_refresh BEFORE INSERT OR UPDATE ON om.license_fa
 -- -- --
 -- UPSERTS
 
-CREATE OR REPLACE FUNCTION om.licenses_upsert(
+CREATE FUNCTION om.licenses_upsert(
    p_label text, p_version text, p_name text, p_family text, p_equiv_name text DEFAULT NULL, p_info JSONB DEFAULT NULL
 ) RETURNS integer AS $$
 DECLARE
@@ -402,7 +461,7 @@ CREATE TABLE IF NOT EXISTS lib.table_datapackages(
   kx_name varchar(120) -- cache for name when not see json
 );
 
-CREATE OR REPLACE FUNCTION lib.to_oid(
+CREATE FUNCTION lib.to_oid(
 --
 -- Like to_regclass(rel_name), gets OID from table name, complete-name, or schema-name pair.
 -- See exception and "NULL alternatives" at http://stackoverflow.com/a/24089729/287948 
@@ -412,7 +471,7 @@ CREATE OR REPLACE FUNCTION lib.to_oid(
   SELECT (CASE WHEN $2 IS NULL THEN $1 ELSE $1||'.'||$2 END)::regclass::oid;
 $BODY$ LANGUAGE sql IMMUTABLE;
 
-CREATE OR REPLACE FUNCTION lib.from_oid(oid) RETURNS text AS $$
+CREATE FUNCTION lib.from_oid(oid) RETURNS text AS $$
    SELECT pg_catalog.textin(pg_catalog.regclassout($1));
 $$ LANGUAGE SQL;
 
