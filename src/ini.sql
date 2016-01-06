@@ -46,6 +46,7 @@ CREATE TABLE om.licenses (
   UNIQUE(lic_name)
 );
 
+
 -- --- --- --- 
 -- BASIC VIEWS
 
@@ -374,20 +375,20 @@ CREATE FUNCTION om.license_families_refresh() RETURNS trigger AS $script$
 		J = NEW.fam_info;
 		NEW.kx_sort=J->>'sort';
 		NEW.kx_vec = array[ CASE 
-			WHEN J->>'scope'='od' THEN ARRAY[(J->>'degreev1')::int,NULL,NULL]
-			WHEN J->>'scope'='oa' THEN ARRAY[NULL,(J->>'degreev1')::int,NULL]
-			ELSE ARRAY[NULL,NULL,(J->>'degreev1')::int]
+			 WHEN J->>'scope'='od' THEN ARRAY[(J->>'degreev1')::int,NULL,NULL]
+			 WHEN J->>'scope'='oa' THEN ARRAY[NULL,(J->>'degreev1')::int,NULL]
+			 ELSE ARRAY[NULL,NULL,(J->>'degreev1')::int]
 			END, CASE 
-			WHEN J->>'scope'='od' THEN ARRAY[(J->>'degreev2')::int,NULL,NULL]
-			WHEN J->>'scope'='oa' THEN ARRAY[NULL,(J->>'degreev2')::int,NULL]
-			ELSE ARRAY[NULL,NULL,(J->>'degreev2')::int]
+			 WHEN J->>'scope'='od' THEN ARRAY[(J->>'degreev2')::int,NULL,NULL]
+			 WHEN J->>'scope'='oa' THEN ARRAY[NULL,(J->>'degreev2')::int,NULL]
+			 ELSE ARRAY[NULL,NULL,(J->>'degreev2')::int]
 			END, CASE 
-			WHEN J->>'scope'='rt' THEN ARRAY[NULL,NULL,(J->>'degreev3')::int]
-			ELSE ARRAY[NULL,(J->>'degreev3')::int,NULL]
+			 WHEN J->>'scope'='rt' THEN ARRAY[NULL,NULL,(J->>'degreev3')::int]
+			 ELSE ARRAY[NULL,(J->>'degreev3')::int,NULL]
 			END, CASE
-			WHEN J->>'scope'='od' THEN ARRAY[NEW.kx_sort,NULL,NULL]
-			WHEN J->>'scope'='oa' THEN ARRAY[NULL,NEW.kx_sort,NULL]
-			ELSE ARRAY[NULL,NULL,NEW.kx_sort]
+			 WHEN J->>'scope'='od' THEN ARRAY[NEW.kx_sort,NULL,NULL]
+			 WHEN J->>'scope'='oa' THEN ARRAY[NULL,NEW.kx_sort,NULL]
+			 ELSE ARRAY[NULL, NULL, CASE WHEN J->>'scope'='(err)' THEN NULL ELSE NEW.kx_sort END]
 			END
 			];
         END IF;
@@ -439,7 +440,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+--------------------------------
+--------------------------------
+-- STD INSERTS 
 
+INSERT INTO om.license_families(fam_name,fam_info) VALUES 
+  ('(unknowed)', '{"scope":"(err)","sort":-990,"degreeV1":-990,"degreeV2":-990,"degreeV3":-990}'::JSONB)
+  ,('(other)',    '{"scope":"(err)","sort":-995,"degreeV1":-995,"degreeV2":-995,"degreeV3":-995}'::JSONB)
+  ,('(unassoc)',  '{"scope":"(err)","sort":-999,"degreeV1":-999,"degreeV2":-999,"degreeV3":-999}'::JSONB)
+;
+SELECT om.licenses_upsert('(unknowed)','','(unknowed or not-checked license)','(unknowed)',NULL,'{"is_ref":2}'::JSONB);
+SELECT om.licenses_upsert('(other)','','(other license, can be change with updates)','(other)',NULL,'{"is_ref":0}'::JSONB);
 
 --------------------------------
 --------------------------------
@@ -461,7 +472,7 @@ CREATE TABLE IF NOT EXISTS lib.table_datapackages(
   kx_name varchar(120) -- cache for name when not see json
 );
 
-CREATE FUNCTION lib.to_oid(
+CREATE OR REPLACE FUNCTION lib.to_oid(
 --
 -- Like to_regclass(rel_name), gets OID from table name, complete-name, or schema-name pair.
 -- See exception and "NULL alternatives" at http://stackoverflow.com/a/24089729/287948 
@@ -471,7 +482,7 @@ CREATE FUNCTION lib.to_oid(
   SELECT (CASE WHEN $2 IS NULL THEN $1 ELSE $1||'.'||$2 END)::regclass::oid;
 $BODY$ LANGUAGE sql IMMUTABLE;
 
-CREATE FUNCTION lib.from_oid(oid) RETURNS text AS $$
+CREATE OR REPLACE FUNCTION lib.from_oid(oid) RETURNS text AS $$
    SELECT pg_catalog.textin(pg_catalog.regclassout($1));
 $$ LANGUAGE SQL;
 

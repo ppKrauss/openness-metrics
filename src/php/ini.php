@@ -49,10 +49,10 @@ $items = [
 	],
 ];
 
-$sql_delete = ' -- prepare to full refresh of om.scheme
-	DELETE FROM om.licenses;
-	DELETE FROM om.license_families;
-';
+$sql_delete = " -- prepare to full refresh of om.scheme
+	DELETE FROM om.licenses         WHERE substring(lic_id_label,1,1)!='(';
+	DELETE FROM om.license_families WHERE substring(fam_name,1,1)!='(';
+";
 
 // // //
 // INITS:
