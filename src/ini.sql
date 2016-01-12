@@ -113,6 +113,26 @@ CREATE FUNCTION om.famnames_to_ids( text[] ) RETURNS int[] AS $f$
 $f$ LANGUAGE sql IMMUTABLE;
 
 
+-- --- --- ---
+-- generic for family and license names.
+
+CREATE FUNCTION om.nameqts_std( JSON , is_family boolean DEFAULT false) RETURNS JSON AS $f$
+	-- Convert any kind of list of names (array or key-quantity object) into standard one;
+	-- when is_family=fase is license name, else family name.
+	-- Like lib.aggsum(), for standardize family of license names.
+	-- Example: SELECT om.nameqts_std( '{"CC by":999,"CC-BY-NC":55,"CC-BY-nc":15}'::json , true);
+	SELECT json_object(array_agg(stdname),array_agg(qt::text))
+	FROM (
+		WITH lst AS ( 
+			SELECT CASE WHEN is_family THEN om.famname_format(key) ELSE 'licname' END as stdname, 
+				value::float as qt 
+			FROM json_each_text(  $1  ) 
+		) SELECT stdname, sum(qt) as qt 
+		  FROM lst
+		  GROUP BY 1
+	) as t;
+$f$ LANGUAGE sql IMMUTABLE;
+
 -- --- --- --- --- --- --- --- --- --- --- --- --- ---
 -- SPECIFIC FUNCS, other family handlers v1.0 (all tested!)
 
@@ -122,24 +142,83 @@ CREATE FUNCTION om.fam_to_info(int) RETURNS JSON AS $f$
     FROM (  SELECT * FROM om.license_families WHERE $1=fam_id  ) t;
 $f$ LANGUAGE sql IMMUTABLE;
 
-
-CREATE OR REPLACE FUNCTION om.famqts_to_records( JSON ) RETURNS JSON[] AS $f$
-	-- funcao EXPERIMENTAL... sem maior utilidade.
-        -- Example: select om.famqts_to_records('{"CC-BY":696771,"CC-BY-NC":371520}'::json);
-        SELECT array_agg( row_to_json(tt) ) FROM (
-		WITH lst AS ( SELECT key AS fname, value as qt FROM json_each_text($1) )
-		SELECT lf.fam_id, fam_name, qt::int, kx_vec
-		FROM lst LEFT JOIN om.license_families lf ON om.famname_format(fname)=fam_name
-	) tt;
+CREATE FUNCTION om.faminfo_to_degree(
+    faminfo JSONB, version int
+) RETURNS int AS $f$
+	SELECT ($1->>('degreev'||$2::text))::int;
+	-- same as lib.norm2(lib.unfold(kx_vec,$2)) only when degree>0
+	-- or same as COALESCE(kx_vec[$2][1],0) + ... + COALESCE(kx_vec[$2][3],0)
 $f$ LANGUAGE sql IMMUTABLE;
 
 
-CREATE FUNCTION om.famnames_to_degree( text[], int ) RETURNS int[] AS $f$
+CREATE FUNCTION om.famnames_to_degree( famnames text[], p_degversion int ) RETURNS int[] AS $f$
         -- Example: select om.famnames_to_degree( '{cc0,cc-by-nc,cc by}'::text[] , 2);
 	WITH lst AS (SELECT unnest($1) as fname)
-	SELECT array_agg( COALESCE(kx_vec[$2][1],0) + COALESCE(kx_vec[$2][2],0) + COALESCE(kx_vec[$2][3],0) )
+	SELECT array_agg(  om.faminfo_to_degree(lf.fam_info,p_degversion)  )
 	FROM lst LEFT JOIN om.license_families lf ON om.famname_format(fname)=fam_name;
 $f$ LANGUAGE sql IMMUTABLE;
+
+
+CREATE or replace FUNCTION om.scopeqts_calc( JSON[], int default 2 ) RETURNS JSON AS $f$
+	-- input by [{scope,deg,perc}]
+	SELECT array_to_json(array_agg( row_to_json(t3) )) 
+	FROM (
+		WITH t AS ( SELECT unnest($1) as rec)
+		SELECT *, avg_global/(perc/100.0) as avg_scope
+		  FROM (
+			SELECT scope, sum(perc) as perc, sum(deg*perc/100.0) as avg_global	
+			FROM t, json_to_record(rec) d(scope text, deg float, perc float)
+			GROUP BY 1
+		) t2
+	) t3;
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE or replace FUNCTION om.scopeqts_calc( JSON, int default 2 ) RETURNS JSON AS $f$
+	WITH t AS ( SELECT json_array_elements($1) as rec)
+	SELECT om.scopeqts_calc( array_agg(rec), $2 ) FROM t;
+$f$ LANGUAGE sql IMMUTABLE;
+
+
+CREATE FUNCTION om.famqts_calc( JSON, int default 2 ) RETURNS JSON AS $f$
+   -- Complete calc and characterization of a list (of families in array or key-val of family-quantity in object).
+   -- Input sanitized by om.nameqts_std()
+   -- Example: SELECT om.famqts_calc( '{"CC-by":3,"CC by sa":5,"CC-BY":15,"CC-BY":5}'::json , 2);
+   SELECT row_to_json(t2) FROM (
+	SELECT 'family' as aggtype, 
+	       max(tot) as qt_tot, 
+	       $2 as deg_version,
+	       sum(CASE WHEN t.id=1 THEN 0 ELSE 1 END) as n_valids,
+	       count(*) as n,
+	       sum(t.deg::float*t.perc/100.0) as deg_avg,
+	       om.scopeqts_calc(  array_agg(json_object(array['scope',t.scope,'deg',deg::text,'perc',perc::text]))  ) as scopes,
+	       array_agg( row_to_json(t) ) as list  -- each family
+	FROM (
+		WITH lst AS (
+		  SELECT key as name, value::int as qt 
+		  FROM json_each_text(  om.nameqts_std( $1 , true)  )
+		) SELECT COALESCE(fam_id,1) as id, 
+			COALESCE(fam_name,'(unknowed)') as name,
+			COALESCE(fam_info->>'scope','(err)') as scope,
+			lst.qt,   tt.tot, 
+			om.faminfo_to_degree(fam_info,$2) as deg,
+			(100.0*lst.qt::float/tt.tot::float) as perc
+		  FROM om.license_families lf RIGHT JOIN lst ON lst.name=lf.fam_name, 
+			(select sum(qt::int)::float as tot FROM lst) tt
+		  ORDER BY COALESCE(lf.kx_sort,-990) DESC
+	) t
+   ) t2;
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE FUNCTION om.famqts_calc( JSON[], int default 2 ) RETURNS JSON AS $f$
+	WITH lst AS (SELECT unnest($1) as x )	
+	SELECT om.famqts_calc(  json_object(array_agg(key), array_agg(qt::text)), $2 )
+	FROM (
+	  SELECT  key , sum(value::float) as qt   
+	  FROM lst, json_each_text(x) t 
+	  GROUP BY key
+	) t2;
+$f$ LANGUAGE sql IMMUTABLE;
+
 
 
 -- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -234,6 +313,38 @@ CREATE FUNCTION om.licnames_to_ids( text[] ) RETURNS int[] AS $f$
 	FROM lst LEFT JOIN om.licenses_full lf ON om.licname_cmp(lf.lic_id_name,lst.name);
 $f$ LANGUAGE sql IMMUTABLE;
 
+-------
+-- DEPENDENT
+
+
+CREATE or replace FUNCTION om.licqts_calc( JSON, int default 2 ) RETURNS JSON AS $f$
+   -- Complete calc and characterization of a list of licenses (in simple array or license-quantity in object).
+   -- Input sanitized by om.nameqts_std()
+   -- Example: SELECT om.licqts_calc( '{"CC-by2":3,"CC by sa-4":5,"CC-BY-3":15,"CC-BY2":5}'::json , 2);
+   SELECT row_to_json(t2) FROM (
+	SELECT 'license' as aggtype, 
+	       max(tot) as qt_tot, 
+	       $2 as deg_version,
+	       sum(CASE WHEN t.id=1 THEN 0 ELSE 1 END) as n_valids,
+	       count(*) as n,
+	       om.famqts_calc(  array_agg(json_object(array[t.family,t.qt::text])), $2  ) as families,
+	       array_agg( row_to_json(t) ) as list  -- each license
+	FROM (
+		WITH lst AS (
+		  SELECT key as name, value::int as qt 
+		  FROM json_each_text(  om.nameqts_std( $1 , true)  )
+		) SELECT COALESCE(lic_id,1) as id, 
+			COALESCE(lf.lic_id_name,'(unknowed)') as name,
+			COALESCE(lf.fam_name,'(unassoc)') as family,
+			lst.qt,   tt.tot, 
+			(100.0*lst.qt::float/tt.tot::float) as perc
+		  FROM om.licenses_full lf RIGHT JOIN lst ON om.licname_cmp(lf.lic_id_name,lst.name),
+			(select sum(qt::int)::float as tot FROM lst) tt
+		  ORDER BY lf.lic_id_name
+	) t
+   ) t2;
+$f$ LANGUAGE sql IMMUTABLE;
+
 
 -- --- --- --- --- --- --- --- ---
 -- SPECIFIC FUNCS, extra conversion
@@ -324,6 +435,7 @@ CREATE FUNCTION om.family_count_bylicenseids(
   ) SELECT om.family_count_bylicenseids(  array_agg((r->>'lic_id')::int), array_agg((r->>'qt')::int) )
     FROM idqt;
 $f$ LANGUAGE sql IMMUTABLE;
+
 
 
 --
@@ -445,9 +557,9 @@ $$ LANGUAGE plpgsql;
 -- STD INSERTS 
 
 INSERT INTO om.license_families(fam_name,fam_info) VALUES 
-  ('(unknowed)', '{"scope":"(err)","sort":-990,"degreeV1":-990,"degreeV2":-990,"degreeV3":-990}'::JSONB)
-  ,('(other)',    '{"scope":"(err)","sort":-995,"degreeV1":-995,"degreeV2":-995,"degreeV3":-995}'::JSONB)
-  ,('(unassoc)',  '{"scope":"(err)","sort":-999,"degreeV1":-999,"degreeV2":-999,"degreeV3":-999}'::JSONB)
+  ('(unknowed)', '{"scope":"(err)","sort":-990,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB)
+  ,('(other)',    '{"scope":"(err)","sort":-995,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB)
+  ,('(unassoc)',  '{"scope":"(err)","sort":-999,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB)
 ;
 SELECT om.licenses_upsert('(unknowed)','','(unknowed or not-checked license)','(unknowed)',NULL,'{"is_ref":2}'::JSONB);
 SELECT om.licenses_upsert('(other)','','(other license, can be change with updates)','(other)',NULL,'{"is_ref":0}'::JSONB);
@@ -458,7 +570,139 @@ SELECT om.licenses_upsert('(other)','','(other license, can be change with updat
 
 CREATE SCHEMA IF NOT EXISTS lib; -- used in other projects, check if all updated and compatible
 
+
 -- -- -- --
+-- MADLIB (simplified) like functions
+-- See http://doc.madlib.net/latest/group__grp__array.html
+-- and http://doc.madlib.net/latest/linalg_8sql__in.html
+
+CREATE or replace FUNCTION lib.unfold( m anyarray, idx1 int DEFAULT 1, idx2 int DEFAULT NULL) RETURNS anyarray AS $f$
+        -- A kind of unnest, only for handling multidimensional array as an array-of-array.
+        -- The idx2 parameter changes the behaviour, is used for (unfolded) slicing. 
+	WITH item AS (SELECT unnest($1[$2:(CASE WHEN $3 IS NULL THEN $2 ELSE $3 END)]) as x)
+	SELECT array_agg(x) FROM item;
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE or replace FUNCTION lib.array_min(
+    v anyarray
+) RETURNS anyelement AS $f$
+	WITH t AS (SELECT unnest(v) as x) 
+	SELECT MIN(x) FROM t;
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE or replace FUNCTION lib.array_max(
+    v anyarray
+) RETURNS anyelement AS $f$
+	WITH t AS (SELECT unnest(v) as x) 
+	SELECT MAX(x) FROM t;
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE or replace FUNCTION lib.array_scalar_mult(
+    v anyarray, s anyelement
+) RETURNS anyarray AS $f$
+	WITH t AS (SELECT unnest(v) as x) 
+	SELECT array_agg(x*s) FROM t;
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE or replace FUNCTION lib.array_mean(
+    v anyarray
+) RETURNS float AS $f$
+	WITH t AS (SELECT unnest(v) as x) 
+	SELECT AVG(x)::float FROM t;
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE or replace FUNCTION lib.array_stddev(
+    v anyarray
+) RETURNS float AS $f$
+	WITH t AS (SELECT unnest(v) as x) 
+	SELECT stddev_samp(x)::float FROM t;
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE or replace FUNCTION lib.array_mult(
+    v1 anyarray, v2 anyarray
+) RETURNS anyarray AS $f$
+	WITH ab AS ( -- secure unnest(v1) as a, unnest(v2) as b
+		SELECT a, b[idx] as b 
+		FROM unnest(v1) WITH ORDINALITY t(a, idx), (SELECT v2 as b) tt
+	) SELECT array_agg(a*b) FROM ab;
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE or replace  FUNCTION lib.array_div(
+    v1 anyarray, v2 anyarray
+) RETURNS anyarray AS $f$
+	WITH ab AS ( -- secure unnest(v1) as a, unnest(v2) as b
+		SELECT a, b[idx] as b 
+		FROM unnest(v1) WITH ORDINALITY t(a, idx), (SELECT v2 as b) tt
+	) SELECT array_agg(case when b!=0 THEN a/b ELSE NULL END) FROM ab;
+$f$ LANGUAGE sql IMMUTABLE;
+
+---
+CREATE or replace FUNCTION lib.array_dot(
+    v1 anyarray, v2 anyarray
+) RETURNS float AS $f$
+	WITH t AS (SELECT unnest( lib.array_mult(v1,v2) ) as x) 
+	SELECT SUM (x)::float FROM t;
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE or replace FUNCTION lib.norm1(  --vector magnitude (non normalized)
+    v anyarray
+) RETURNS float AS $f$
+	SELECT lib.array_dot(v,v)::float;
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE or replace FUNCTION lib.norm2(  --vector Euclidian norm.
+    v anyarray
+) RETURNS float AS $f$
+	SELECT SQRT( lib.array_dot(v,v)::float );
+$f$ LANGUAGE sql IMMUTABLE;
+
+-- -- --
+-- JSON workarounds
+
+
+
+CREATE OR REPLACE FUNCTION lib.keyval_aggsum( JSON ) RETURNS JSON AS $f$
+	-- Example: select lib.aggsum('{"A":2,"A":3,"B":3}'::json)
+	SELECT json_object(array_agg(key),array_agg(qt::text))
+	FROM (
+		WITH lst AS ( 
+			SELECT key, value::float as qt 
+			FROM json_each_text($1) 
+		)
+		SELECT  key, sum(qt)::float as qt
+		FROM lst 
+		GROUP BY key
+	) tt1
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION lib.array_aggsum( JSON ) RETURNS JSON AS $f$
+	-- example: select lib.aggsum('["A","B","B","A","A","A","B"]'::json)
+	SELECT json_object(array_agg(jkey),array_agg(qt::text))
+	FROM (
+		WITH lst AS ( 
+		   SELECT trim(jkey::text,'"') as jkey FROM json_array_elements($1) as jkey
+		) SELECT  jkey, count(*) as qt
+		  FROM lst 
+		  GROUP BY 1
+	) tt1
+$f$ LANGUAGE sql IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION lib.aggsum( JSON ) RETURNS JSON AS $f$
+	-- Aggregates distinct keys by sum of its quantities. Array or key-value object.
+DECLARE
+  tmp int;
+BEGIN 
+	tmp = json_array_length($1); -- triggs error when not array
+	RETURN lib.array_aggsum($1);
+EXCEPTION
+    WHEN OTHERS THEN RETURN lib.keyval_aggsum($1);
+END;
+$f$ LANGUAGE plpgsql IMMUTABLE;
+
+
+
+-- -- -- --
+-- ADM
 
 CREATE TABLE IF NOT EXISTS lib.table_datapackages(
 --

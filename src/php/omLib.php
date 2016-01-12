@@ -10,6 +10,19 @@
 //Falta usar chamada PDO ao SELECT om.family_count_bylicenseids( om.license_ids_bynames() )
 //a ser usado como referência nesta LIB. Calculos de escopo não precisam ser SQL.
 
+	// // // //
+	// CONFIGS: (by include secure/configs.php)
+
+	$PG_USER = 'postgres';
+	$PG_PW   = 'xxxxxxxx'; 
+	$dsn="pgsql:dbname=postgres;host=localhost";
+	$degVers =1; //may be overhide by request
+	$cmd = ''; // method
+	$list = '';
+	$callerID = '';
+	$is_cmdFam = NULL;
+	$is_cmdLic = NULL;
+
 /////////////////
 // ERROR HANDLING
 
@@ -332,6 +345,67 @@ function set_graph_3slices($vals, $vLabel, $is_float, $is_explode, $no_label=tru
 		$GG = $graph_3slices->Fetch('PieGraph', false);
 	$GG = preg_replace('#<rect .+?/>#','',$GG);
 	return $GG;
+}
+
+
+// // // // // // // // //
+// // input/output CONTROL
+
+/**
+ * POST/GET checker
+ */
+function checkrequest(&$x,$name,&$bool=NULL) {
+	if (isset($_REQUEST[$name])) {
+		$x = $_REQUEST[$name];
+		unset($_REQUEST[$name]);
+		$bool=true;
+		//if ($bool!==NULL) $bool=true;
+	}
+}
+
+/**
+ * Like array_combine(list,$pair) but pair is optional and 
+ * value is the sum of values (default 1), or number of occurences.
+ */
+function array_combine_sum($list,$pair=NULL) {
+	$ret = [];
+	foreach($list as $idx=>$x) {
+		$v = ($pair!==NULL)? $pair[$idx]: 1;
+		$x = trim($x);
+		if ($x>'') {if (isset($ret[$x])) $ret[$x] += $v; else $ret[$x]=$v;}	
+	}
+	return $ret;
+}
+
+ 
+/**
+ * Submit request (cmd with params) to the database. As webservice.
+ */
+function request_ws($cmd,$params,$degVers=2) {
+	global $dsn;
+	global $PG_USER;
+	global $PG_PW;
+
+	$jinfo = json_encode($params);
+	switch ($cmd) {
+		case 'licqts_calc':
+			$sql = "SELECT om.licqts_calc(:j_info::json,$degVers)";
+			break;
+
+		case 'famqts_calc':
+			$sql = "SELECT om.famqts_calc(:j_info::json,$degVers)";
+			break;
+		default:
+			die( "COMANDO '$cmd' DESCONHECIDO" );
+	}
+	$db = new pdo($dsn,$PG_USER,$PG_PW);
+	$stmt = $db->prepare($sql);
+	$stmt->bindParam(":j_info", $jinfo);
+	$ok = $stmt->execute();
+	if ($ok)
+		return $stmt->fetchColumn();
+	else
+		return NULL;
 }
 
 ?>

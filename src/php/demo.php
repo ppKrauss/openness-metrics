@@ -3,6 +3,14 @@ require_once 'SVGGraph/SVGGraphColours.php';
 require_once 'SVGGraph/SVGGraph.php';
 require_once 'omLib.php';
 
+// // // // // // // // // //
+// CONFIGS: (complement to omLib)
+	$projects = [
+		'licences'=>		'/home/peter/gits/licenses',
+		'openness-metrics'=>	'/home/peter/gits/openness-metrics'
+	];
+	$reini = true;  // re-init all SQL structures of the project (drop and refresh schema)
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -58,6 +66,8 @@ require_once 'omLib.php';
 </div>
 
 <?php echo set_OpenMetricsBox(
+	// ver dados em  https://docs.google.com/spreadsheets/d/16CSuXKqYr3kDtmPyrz5lNzjyFITpQxdGw7it48e2eoE/edit#gid=0
+	// e https://gitlab.com/ciencialivre/openlattes/issues/19
 	['DOAJ','pt','DOAJ Seal 2015', 
 	 'As <i>licenças default</i> utilizadas pelas <a target="_blank" href="https://doaj.org/search?source=%7B%22query%22%3A%7B%22filtered%22%3A%7B%22filter%22%3A%7B%22bool%22%3A%7B%22must%22%3A%5B%7B%22term%22%3A%7B%22_type%22%3A%22journal%22%7D%7D%2C%7B%22term%22%3A%7B%22index.has_seal.exact%22%3A%22Yes%22%7D%7D%5D%7D%7D%2C%22query%22%3A%7B%22match_all%22%3A%7B%7D%7D%7D%7D%2C%22sort%22%3A%5B%7B%22created_date%22%3A%7B%22order%22%3A%22desc%22%7D%7D%5D%2C%22from%22%3A0%2C%22size%22%3A10%7D#.VowgonUrI8o">5302 revistas certificadas do diretório DOAJ</a> de revistas OpenAccess 
 	 serviram de fonte uniforme (igual peso independente da revista) para a caracterização do DOAJ.  

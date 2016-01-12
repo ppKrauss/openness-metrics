@@ -3,20 +3,7 @@
  * Scans and charges CSV data to the SQL database.
  * See also scripts at "ini.sql" (run it first!).
  * php openness-metrics/src/php/ini.php
-
-falta informar erro de exec
  */
-
-// // // //
-// CONFIGS:
-$PG_USER = 'postgres';
-$PG_PW   = 'pp@123456'; 
-$dsn="pgsql:dbname=postgres;host=localhost";
-$projects = [
-	'licences'=>		'/home/peter/gits/licenses',
-	'openness-metrics'=>	'/home/peter/gits/openness-metrics'
-];
-$reini = true;  // re-init all SQL structures of the project (drop and refresh schema)
 
 include 'omLib.php';  
 // include 'doaj_get.php';  // for check openness degree of citations in sciDocs. 
