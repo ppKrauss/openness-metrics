@@ -8,6 +8,14 @@
 include 'omLib.php';  
 // include 'doaj_get.php';  // for check openness degree of citations in sciDocs. 
 
+// // // // // // // // // //
+// CONFIGS: (complement to omLib)
+	$projects = [
+		'licences'=>		'/home/peter/gits/licenses',
+		'openness-metrics'=>	'/home/peter/gits/openness-metrics'
+	];
+	$reini = true;  // re-init all SQL structures of the project (drop and refresh schema)
+
 
 // // // // //
 // SQL PREPARE
