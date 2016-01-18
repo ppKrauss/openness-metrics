@@ -1,25 +1,13 @@
 ## How much open is it?
 This project is an initiative to shift the traditional conversations about [Open access](https://en.wikipedia.org/wiki/Open_access), from “All here is open access?”, “How to compare open things?”... to "How much open is this set?",  and transform consensual answers into concrete things!
 
-Document collections, full repositories, set of documents in a journal issue, set in of documents in a list of references, set of projects of a Github user, set of images of Wikimedia... Any kind of set, any kind of creative work. How much open is this set?
+Document collections, full repositories, set of documents in a journal issue, set in of documents in a list of references, set of projects of a Github user, set of images of Wikimedia... About any kind of set, any kind of creative work, we can ask *"How much open is it?"*.
 
-This project is a technical response, creating a reference-database, foundations for *openness metrics*, and a concrete set of online tools. Differing from [OAS](http://www.oaspectrum.org) the focus of this tools are the autit of license type of each document, and distribution of license types over the set of documents. The project use the most simple and objective aproach: an average of the "openness degree" of each element of the set. So, we have two main working lines:
+This project is a technical response, creating a reference-database, foundations for *openness metrics*, and a concrete kit of online tools. Differing from [OAS](http://www.oaspectrum.org) the focus of this tools are the autit of license type of each document, and distribution of license types over the set of documents. The project use the most simple and objective aproach: an average of the "openness degree" of each element of the set. So, we have two main working lines:
 
-* to keep a [dataset](https://github.com/datasets) of reliable license descriptors with reliable inference about *license family* and most commom and consensual measure of "openness degree" of each family of lincenses.
+* to keep a [dataset](https://github.com/datasets) of reliable license descriptors with reliable metadata about *license family* and about most [commom/consensual measure of "openness degree"](https://commons.wikimedia.org/wiki/File_talk:Ordering_of_Creative_Commons_licenses_from_most_to_least_open.png#Suggestion_for_ordering_by_an_openness-degree_criteria) of each family of lincenses.
 
-* establish a mathematical criterion and a database (SQL) tool to do the averages.
-
-
-# Summary of Openness Metrics project
-A mini-framework to check the license of a work (document, software and others), express its openness degree, and calculate the average of openness degree of a set of works. All in a SQL service with JSON front-end, and PHP/Python/Javascript/AnyOther driver to enable pretty reports and other uses.
-
-The main sources of this project are:
-
-* [families](data/families.csv): Families of licenses and openness degree definition (many def versions). [Get original sources as formated spreadsheet or comment here](https://docs.google.com/spreadsheets/d/1nf3vFHcLpgVTcFbUJp8pL3H8fsBFvjrWA07AI2JZtk8/edit?usp=sharing).
-
-* [licenses](https://github.com/ppKrauss/licenses): licenses dataset, to feed the PostgreSQL database.
-
-![uml class diagram](_doc/uml_diagram.png)
+* establish a mathematical criterion and a database (SQL) tool, to do the averages subsidizing pretty reports.
 
 # Prepare
 
@@ -38,6 +26,17 @@ sudo chmod -R g+rwx /var/www/html/ometrics
 
 rm -r openness-metrics; rm -r licenses # optional
 ```
+
+# Summary of the Openness-metrics project
+A mini-framework to check the license of a work (document, software and others), express its openness degree, and calculate the average of openness degree of a set of works. All in a SQL service with JSON front-end, and PHP/Python/Javascript/AnyOther driver to enable pretty reports and other uses.
+
+The main sources of this project are:
+
+* [families](data/families.csv): Families of licenses and openness degree definition (many def versions). [Get original sources as formated spreadsheet or comment here](https://docs.google.com/spreadsheets/d/1nf3vFHcLpgVTcFbUJp8pL3H8fsBFvjrWA07AI2JZtk8/edit?usp=sharing).
+
+* [licenses](https://github.com/ppKrauss/licenses): licenses dataset, to feed the PostgreSQL database.
+
+![uml class diagram](_doc/uml_diagram.png)
 
 # Using 
 Examples of how to use the library with the database or directly as webservice.
