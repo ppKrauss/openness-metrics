@@ -95,7 +95,7 @@ For final users, the JSON, numbers or tables are not pretty. Communication about
 
 A typical report must show a pie chart of the distribution of the elements in each scope, the version of the *openness degree scale* used in the report, the general *openness degree average* of the set, and *openness degree averages* of each scope. Standard colors and icons also helps to compare and fastly understand the results. The standard report text also need some multilingual support.
 
-![demo, reports illustration 2](_doc/report-illustr2-620px.png)
+![demo, reports illustration 2](_doc/report-illustr2-680px.png)
 
 The [demo](src/php/demo.php) shows a more complete contextualization, use of box-report interface, and use of the service parameters for AJAX contexts.
 

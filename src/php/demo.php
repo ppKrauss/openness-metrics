@@ -40,7 +40,7 @@
 			}
 		},
 		{ xid: 'acme1'
-		 ,title: 'ACME docs 2013' 
+		 ,title: 'ACME collection' 
 		 ,msg_pt: "xx pt licenças default utilizadas pelas ... #stdDev# ... revistas são #RELAT#. #STDREPORT#"
 		 ,msg_en: "xx en licenses default utilizadas pelas ... #stdDev# ... revistas são #RELAT#. #STDREPORT#"
 		 ,lst_type: 'families'
@@ -204,7 +204,7 @@
 		      <option value="ex1" selected="selected">SciELO-BR profile</option>
 		</optgroup>
 		<optgroup label="Fake (demo)">
-		      <option value="ex2">ACME docs 2013</option>
+		      <option value="ex2">ACME collection</option>
 		      <option value="ex3">yyyy</option>
 		</optgroup>
 		<!-- option value="exP">PERSONALIZADO</option -->
