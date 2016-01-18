@@ -1,7 +1,7 @@
 ## How much open is it?
 This project is an initiative to shift the traditional conversations about [Open access](https://en.wikipedia.org/wiki/Open_access), from “All here is open access?”, “How to compare open things?”... to "How much open is this set?",  and transform consensual answers into concrete things!
 
-Document collections, full repositories, set of documents in a journal issue, set in of documents in a list of references, set of projects of a Github user, set of images of Wikimedia... About any kind of set, any kind of creative work, we can ask *"How much open is it?"*.
+Document collections, full repositories, set of articles in a journal issue, set of documents in a list of references, set of projects of a Github user, set of images of a Wikimedia category... About any kind of set, any kind of creative work, we can ask *"How much open is it?"*.
 
 This project is a technical response, creating a reference-database, foundations for *openness metrics*, and a concrete kit of online tools. Differing from [OAS](http://www.oaspectrum.org) the focus of this tools are the autit of license type of each document, and distribution of license types over the set of documents. The project use the most simple and objective aproach: an average of the "openness degree" of each element of the set. So, we have two main working lines:
 
@@ -39,7 +39,7 @@ The main sources of this project are:
 ![uml class diagram](_doc/uml_diagram.png)
 
 # Using 
-Examples of how to use the library with the database or directly as webservice.
+Examples of how to use the library with the database or directly as webservice. For more details, see documentation embedded in source code, the main one is [src/ini.sql](https://github.com/ppKrauss/openness-metrics/blob/master/src/ini.sql).
 
 ## Services in SQL 
 
@@ -48,9 +48,12 @@ Check and format services
 ```sql
 -- Format a license name string
 SELECT om.licname_format(' cc-by SA --v3 '); -- 'cc-by-sa-3'
-
+-- Sanitize a list of pairs name-quantity (with opt flag for families)
+SELECT om.nameqts_std( '{"CC by-v3":10,"CC-BY3":1,"CC BY-NC 4":1}'::json);
+       -- {"cc-by-nc-4":1, "cc-by-3":11}
 -- Check if a license name exist in the database (NULL if not, the standard name if exists)
 SELECT om.licname_to_name('apache 2'), om.licname_to_name('GPL 5'); -- 'Apache-2.0', NULL
+
 -- ... check a list of license names.
 SELECT om.licname_to_name(array['cc by v3','gpl5','apache2']) -- array ['CC-BY-3.0',NULL,'Apache-2.0']
 
@@ -73,6 +76,7 @@ SELECT om.famqts_calc( '{"CC-by":13,"CC by sa":5,"CC-BY":15,"CC-BY":5}'::json , 
 SELECT om.licqts_calc('{"CC-by3":2,"CC-by2":3,"CC by sa3":5,"CC-BY v4":15}'::json);
        -- {"aggtype":"license","qt_tot":25,"deg_version":2,"n_valids":4, ...}
 ```
+The input of *average report* functions are key-value pairs with valid names as keys and "license quantities" (ex. number of documents with same license) as values.
 
 ## Basic webservices 
 ... php example ...
