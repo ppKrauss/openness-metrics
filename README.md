@@ -35,24 +35,24 @@ rm -r openness-metrics; rm -r licenses # optional
 # Links and references
 
 * Open Access Organizations
-** [DOAJ](https://doaj.org/) - Directory of Open Access Journals
-*** http://www.oaspectrum.org/faq
-*** http://www.oaspectrum.org/api
-** [OAS](http://www.oaspectrum.org/) - Open Access Spectrum
-** [SPARC](http://sparcopen.org/) - the Scholarly Publishing and Academic Resources Coalition
-*** http://www.sparc.arl.org/blog/announcing-open-access-spectrum-oas-evaluation-tool
-*** https://community.cochrane.org/editorial-and-publishing-policy-resource/open-access#HowOpenScale
-** [OASPA](http://oaspa.org/) - Open Access Scholarly Publishers Association
+ * [DOAJ](https://doaj.org/) - Directory of Open Access Journals
+   * http://www.oaspectrum.org/faq
+   * http://www.oaspectrum.org/api
+ * [OAS](http://www.oaspectrum.org/) - Open Access Spectrum
+ * [SPARC](http://sparcopen.org/) - the Scholarly Publishing and Academic Resources Coalition
+   * http://www.sparc.arl.org/blog/announcing-open-access-spectrum-oas-evaluation-tool
+   * https://community.cochrane.org/editorial-and-publishing-policy-resource/open-access#HowOpenScale
+ * [OASPA](http://oaspa.org/) - Open Access Scholarly Publishers Association
 
 * Initiatives (projects, programs, etc. of the organizations)
-** http://www.howopenisit.org The "HowOpenIsIt?" program is a family of resources and services ... as OAS. Was developed by PLOS, SPARC, and OASPA.
-** http://ananelson.github.io/oacensus/
-** https://www.plos.org/wp-content/uploads/2014/10/hoii-guide_V2_FINAL.pdf
+ * http://www.howopenisit.org The "HowOpenIsIt?" program is a family of resources and services ... as OAS. Was developed by PLOS, SPARC, and OASPA.
+ * http://ananelson.github.io/oacensus/
+ * https://www.plos.org/wp-content/uploads/2014/10/hoii-guide_V2_FINAL.pdf
 
 * Scientific Open Access content (articles)
-** [SciELO](http://www.scielo.org/) - half million of articles
-** [PubMed Central](http://www.ncbi.nlm.nih.gov/pmc/) - 3.7 million of articles
+ * [SciELO](http://www.scielo.org/) - half million of articles
+ * [PubMed Central](http://www.ncbi.nlm.nih.gov/pmc/) - 3.7 million of articles
 
 * Other
-** [Ordering of Creative Commons licenses](https://commons.wikimedia.org/wiki/File:Ordering_of_Creative_Commons_licenses_from_most_to_least_open.png) - ordering of CC licenses illustration
-** ...
+ * [Ordering of Creative Commons licenses](https://commons.wikimedia.org/wiki/File:Ordering_of_Creative_Commons_licenses_from_most_to_least_open.png) - ordering of CC licenses illustration
+ * ...
