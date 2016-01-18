@@ -47,14 +47,14 @@ $glo_scope = ['od','oa','rt'];
 /**
  * Initialization, get datapackage.json and project descriptions to transform in a SQL+JSON database.
  */
-function jsonCsv_to_sql(&$items, &$projects, &$db, $SEP = ',', $nmax = 0) {
+function jsonCsv_to_sql(&$items, &$projects, &$db, $SEP = ',', $nmax = 0, $verbose=2) {
 	$OUT_report = '';
 	$n=$N=$N2=0;
 	foreach($items as $prj=>$r)
 	   foreach ($r as $dataset) {
 		$folder = $projects[$prj];
 		$sql = array_shift($dataset);
-		$OUT_report.= "\n\n---- PRJ $prj {{ $sql }}";
+		$OUT_report.= "\n\n---- PRJ $prj".(($verbose>=2)? " {{ $sql }}": '');
 
 		$stmt = $db->prepare($sql);
 		$jpack = json_decode( file_get_contents("$folder/datapackage.json"), true );

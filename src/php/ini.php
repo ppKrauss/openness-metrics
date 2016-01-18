@@ -5,17 +5,18 @@
  * php openness-metrics/src/php/ini.php
  */
 
-include 'omLib.php';  
-// include 'doaj_get.php';  // for check openness degree of citations in sciDocs. 
+include 'omLib.php';
+$verbose = 1; // 0,1 or 2
+
+// include 'doaj_get.php';  // for check openness degree of citations in sciDocs.
 
 // // // // // // // // // //
 // CONFIGS: (complement to omLib)
 	$projects = [
 		'licences'=>		'/home/peter/gits/licenses',
-		'openness-metrics'=>	'/home/peter/gits/openness-metrics'
+		'openness-metrics'=>	'/var/www/html/openness-metrics'
 	];
 	$reini = true;  // re-init all SQL structures of the project (drop and refresh schema)
-
 
 // // // // //
 // SQL PREPARE
@@ -23,7 +24,7 @@ $items = [
 	'openness-metrics'=>[
 		array('INSERT INTO om.license_families(fam_name,fam_info) VALUES (:family::text, :json_info::JSONB)',
 			'families.csv::strict'
-		), 
+		),
 		// array(..., 'scopes.csv')
 	],
 	'licences'=>[
@@ -62,8 +63,7 @@ sql_exec($db,$sql_delete);
 
 print "BEGIN processing ...";
 
-list($n2,$n,$msg) = jsonCsv_to_sql($items,$projects,$db);
+list($n2,$n,$msg) = jsonCsv_to_sql($items,$projects,$db, ',', 0, $verbose);
 
 print "$msg\n\nEND(tot $n lines scanned, $n2 lines used)\n";
 ?>
-

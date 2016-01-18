@@ -17,9 +17,11 @@ Feed the database, and install the demo and webservice as a `ometrics` in the ht
 cd yourSandBox
 git clone https://github.com/ppKrauss/licenses.git
 git clone https://github.com/ppKrauss/openness-metrics.git
-nano openness-metrics/src/php/omLib.php  # change configs as $PG_PW
-php openness-metrics/src/php/ini.php     # feed database
 
+nano openness-metrics/src/php/ini.php    # change configs as $projects paths
+nano openness-metrics/src/php/omLib.php  # change configs as $PG_PW
+
+php openness-metrics/src/php/ini.php     # feed database
 mv openness-metrics/src/php /var/www/html/ometrics
 mv openness-metrics/src/assets /var/www/html/ometrics
 sudo chmod -R g+rwx /var/www/html/ometrics
@@ -38,10 +40,10 @@ The main sources of this project are:
 
 ![uml class diagram](_doc/uml_diagram.png)
 
-# Using 
+# Using
 Examples of how to use the library with the database or directly as webservice. For more details, see documentation embedded in source code, the main one is [src/ini.sql](https://github.com/ppKrauss/openness-metrics/blob/master/src/ini.sql).
 
-## Services in SQL 
+## Services in SQL
 
 Check and format services
 
@@ -68,11 +70,11 @@ Information retrieval services
 -- Get (in JSON) all existing information about a family, by name or by id
 SELECT om.famname_to_info('cc  BY'), om.fam_to_info(6);  -- both {"fam_id":6,"fam_name":"cc-by", ...}
 
--- Get a complete JSON "average results" report from JSON input of a family list. 
+-- Get a complete JSON "average results" report from JSON input of a family list.
 SELECT om.famqts_calc( '{"CC-by":13,"CC by sa":5,"CC-BY":15,"CC-BY":5}'::json , 1);
        -- {"aggtype":"family","qt_tot":38,"deg_version":1,"n_valids":2, ... }
 
--- Get a complete JSON "average results" report from JSON input of a license-name list. 
+-- Get a complete JSON "average results" report from JSON input of a license-name list.
 SELECT om.licqts_calc('{"CC-by3":2,"CC-by2":3,"CC by sa3":5,"CC-BY v4":15}'::json);
        -- {"aggtype":"license","qt_tot":25,"deg_version":2,"n_valids":4, ...}
 ```
@@ -82,10 +84,10 @@ The input of *average report* functions are key-value pairs with valid names as 
 The natural insterface is POST JSON request, but some GET variations are offered.  All the examples can be adpted to pretty REST syntax using Apache2's `.htaccess` file or another HTTP server configuration. Below using the [PHP driver](./src/php) to illustrate [OpenURL style](https://en.wikipedia.org/wiki/OpenURL) for webservice calling.
 
  1. `ws.php?families=cc-by;cc-by-nc;cc0;cc-by;cc-by-sa;cc0;cc-by-nd;cc0&degvers=2` returns the same as `ws.php?cmd=famqts_calc&list=...`  or SQL's `SELECT om.famqts_calc( '{cc-by,cc-by-nc,cc0,cc-by,cc-by-sa,cc0,cc-by-nd,cc0}'::text[] , 2)`
- 
+
  2. `ws.php?licenses=cc-by2;cc-by-nc3;cc0,cc-by2;cc-by-sa3;cc0,cc-by2;cc0&degvers=2` returns the same as `SELECT om.licqts_calc( '{cc-by2,cc-by-nc3,cc0,cc-by2,cc-by-sa3,cc0,cc-by2,cc0}'::text[] , 2)`
- 
- 3. `ws.php?method=licname_to_name&list=cc-by2;cc-by-nc3;cc0,cc-by2;cc-by-sa3` returns the same as `SELECT om.licname_to_name( '{cc-by2,cc-by-nc3,cc0,cc-by2,cc-by-sa3}'::text[])` ... The `method` parameter can be the name of any `om.lic*()` or `om.fam*()` [SQL functions](./src/ini.sql). 
+
+ 3. `ws.php?method=licname_to_name&list=cc-by2;cc-by-nc3;cc0,cc-by2;cc-by-sa3` returns the same as `SELECT om.licname_to_name( '{cc-by2,cc-by-nc3,cc0,cc-by2,cc-by-sa3}'::text[])` ... The `method` parameter can be the name of any `om.lic*()` or `om.fam*()` [SQL functions](./src/ini.sql).
 
 ## Pretty report services
 

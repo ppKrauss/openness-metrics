@@ -119,7 +119,7 @@
 					if (!g_state.chg(this,'debug')) alert("no changes"); 
 				}
 			});
-		}
+		} // for optional layout see http://jsfiddle.net/Gajotres/xFPFH/
 
 	}); // onload
 
