@@ -1,10 +1,17 @@
 ## How much open is it?
-This project is an initiative to shift the traditional conversations about [Open access](https://en.wikipedia.org/wiki/Open_access), from “Is it open access?”, “How to compare open things?”... to "How much open is it?",  and transform consensual answers into concrete things!
+This project is an initiative to shift the traditional conversations about [Open access](https://en.wikipedia.org/wiki/Open_access), from “All here is open access?”, “How to compare open things?”... to "How much open is this set?",  and transform consensual answers into concrete things!
 
-It is a technical response, creating a reference-database, foundations for *openness metrics*, and a concrete set of online tools. Differing from [OAS](http://www.oaspectrum.org) the focus of this tools are the autit of license type of each document, and distribution of license types over the set of documents.
+Document collections, full repositories, set of documents in a journal issue, set in of documents in a list of references, set of projects of a Github user, set of images of Wikimedia... Any kind of set, any kind of creative work. How much open is this set?
 
-# The Openness Metrics project
-A mini-framework to check the license of a work (document, software and others), express its openness degree, and calculate the average of openness degree of a set of works.
+This project is a technical response, creating a reference-database, foundations for *openness metrics*, and a concrete set of online tools. Differing from [OAS](http://www.oaspectrum.org) the focus of this tools are the autit of license type of each document, and distribution of license types over the set of documents. The project use the most simple and objective aproach: an average of the "openness degree" of each element of the set. So, we have two main working lines:
+
+* to keep a [dataset](https://github.com/datasets) of reliable license descriptors with reliable inference about *license family* and most commom and consensual measure of "openness degree" of each family of lincenses.
+
+* establish a mathematical criterion and a database (SQL) tool to do the averages.
+
+
+# Summary of Openness Metrics project
+A mini-framework to check the license of a work (document, software and others), express its openness degree, and calculate the average of openness degree of a set of works. All in a SQL service with JSON front-end, and PHP/Python/Javascript/AnyOther driver to enable pretty reports and other uses.
 
 The main sources of this project are:
 
@@ -31,6 +38,48 @@ sudo chmod -R g+rwx /var/www/html/ometrics
 
 rm -r openness-metrics; rm -r licenses # optional
 ```
+
+# Using 
+Examples of how to use the library with the database or directly as webservice.
+
+## Services in SQL 
+
+Check and format services
+
+```sql
+-- Format a license name string
+SELECT om.licname_format(' cc-by SA --v3 '); -- 'cc-by-sa-3'
+
+-- Check if a license name exist in the database (NULL if not, the standard name if exists)
+SELECT om.licname_to_name('apache 2'), om.licname_to_name('GPL 5'); -- 'Apache-2.0', NULL
+-- ... check a list of license names.
+SELECT om.licname_to_name(array['cc by v3','gpl5','apache2']) -- array ['CC-BY-3.0',NULL,'Apache-2.0']
+
+-- Format a family name string
+SELECT om.famname_format(' CC BY-nc-ND '); -- 'cc-by-nc-nd'
+-- ... check a list of family names.
+SELECT om.famname_to_id(array['CC0','xyz','CC by-nc ']); -- array [4,NULL,10]
+```
+
+Information retrieval services
+```sql
+-- Get (in JSON) all existing information about a family, by name or by id
+SELECT om.famname_to_info('cc  BY'), om.fam_to_info(6);  -- both {"fam_id":6,"fam_name":"cc-by", ...}
+
+-- Get a complete JSON "average results" report from JSON input of a family list. 
+SELECT om.famqts_calc( '{"CC-by":13,"CC by sa":5,"CC-BY":15,"CC-BY":5}'::json , 1);
+       -- {"aggtype":"family","qt_tot":38,"deg_version":1,"n_valids":2, ... }
+
+-- Get a complete JSON "average results" report from JSON input of a license-name list. 
+SELECT om.licqts_calc('{"CC-by3":2,"CC-by2":3,"CC by sa3":5,"CC-BY v4":15}'::json);
+       -- {"aggtype":"license","qt_tot":25,"deg_version":2,"n_valids":4, ...}
+```
+
+## Basic webservices 
+... php example ...
+
+## Pretty report services
+... php example ...
 
 # Links and references
 
