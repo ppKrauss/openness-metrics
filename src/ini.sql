@@ -164,9 +164,9 @@ CREATE or replace FUNCTION om.scopeqts_calc( JSON[], int default 2 ) RETURNS JSO
 	SELECT array_to_json(array_agg( row_to_json(t3) )) 
 	FROM (
 		WITH t AS ( SELECT unnest($1) as rec)
-		SELECT *, avg_global/(perc/100.0) as avg_scope
+		SELECT *, 100.0*avg_global/perc_global as avg_scope -- avgdeg
 		  FROM (
-			SELECT scope, sum(perc) as perc, sum(deg*perc/100.0) as avg_global	
+			SELECT scope, sum(perc) as perc_global, sum(deg*perc/100.0) as avg_global	
 			FROM t, json_to_record(rec) d(scope text, deg float, perc float)
 			GROUP BY 1
 		) t2
