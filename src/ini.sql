@@ -222,6 +222,15 @@ CREATE FUNCTION om.famqts_calc( JSON[], int default 2 ) RETURNS JSON AS $f$
 	) t2;
 $f$ LANGUAGE sql IMMUTABLE;
 
+CREATE FUNCTION om.famqts_calc( text[], int default 2 ) RETURNS JSON AS $f$
+	WITH lst AS (SELECT unnest($1) as name )	
+	SELECT om.famqts_calc(  json_object(array_agg(name), array_agg(qt::text)), $2 )
+	FROM (
+	  SELECT name, count(*)::int as qt -- later use group by famname_format(name)  
+	  FROM lst GROUP BY 1
+	) t2;
+$f$ LANGUAGE sql IMMUTABLE;
+
 
 
 -- --- --- --- --- --- --- --- --- --- --- --- --- ---
