@@ -97,7 +97,7 @@ A typical report must show a pie chart of the distribution of the elements in ea
 
 ![demo, reports illustration 2](_doc/report-illustr2-680px.png)
 
-The [demo](src/php/demo.php) shows a more complete contextualization, use of box-report interface, and use of the service parameters for AJAX contexts.
+The [demo](src/php/demo.php) shows a more complete contextualization, use of box-report interface, and use of the service parameters for [AJAX](https://en.wikipedia.org/wiki/Ajax_(programming)) contexts.
 
 # Links and references
 

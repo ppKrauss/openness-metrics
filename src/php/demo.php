@@ -44,15 +44,14 @@
 		 ,msg_pt: "xx pt licenças default utilizadas pelas ... #stdDev# ... revistas são #RELAT#. #STDREPORT#"
 		 ,msg_en: "xx en licenses default utilizadas pelas ... #stdDev# ... revistas são #RELAT#. #STDREPORT#"
 		 ,lst_type: 'families'
-		 ,lst: {  // SCIELO DEFAULT LICENSE FAMILIES
-			'CC-BY-NC':	83,
-			'CC-BY':	14,	
-			'CC-BY-NC-ND':	3
+		 ,lst: {  // ACME LICENSE FAMILIES
+			'CC-BY-SA':	500,
+			'copyright0':	10,	
+			'copyright-pay': 11,	
+			'CC-BY-NC':	458
 			}
 		}
-
 	];
-
 
 	g_state.onChangeHub = function (id,obj,params) { 
 		switch(id) {  // EACH STATE-CHANGE (by DOM id)
@@ -100,7 +99,7 @@
 			$('#p_id'). 	  val(exemplos[exIdx].xid);
 			$('#p_title'). 	  val(exemplos[exIdx].title);
 			$('#p_lst_type'). val(exemplos[exIdx].lst_type);
-			$('#p_lst').	  val( Object.keys(exemplos[exIdx].lst).join() );
+			$('#p_lst').	  val( keyVal_toString(exemplos[exIdx].lst) );
 			return true;
 
 		    default:

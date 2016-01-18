@@ -46,3 +46,14 @@ var g_state = {
 	// o ideal é armazenar em data-dom o valor padronizado. O estado pode ser uma string ou um json.
 };
 
+/// UTIL LIB 
+
+
+function keyVal_toString(lst) {
+	var s=[];
+	for(var i in lst)
+ 		s.push(i+'='+lst[i])
+	return s.join();
+}
+
+
