@@ -124,7 +124,7 @@ CREATE FUNCTION om.nameqts_std( JSON , is_family boolean DEFAULT false) RETURNS 
 	SELECT json_object(array_agg(stdname),array_agg(qt::text))
 	FROM (
 		WITH lst AS ( 
-			SELECT CASE WHEN is_family THEN om.famname_format(key) ELSE 'licname' END as stdname, 
+			SELECT CASE WHEN is_family THEN om.famname_format(key) ELSE om.licname_format(key) END as stdname,
 				value::float as qt 
 			FROM json_each_text(  $1  ) 
 		) SELECT stdname, sum(qt) as qt 
@@ -151,11 +151,14 @@ CREATE FUNCTION om.faminfo_to_degree(
 $f$ LANGUAGE sql IMMUTABLE;
 
 
-CREATE FUNCTION om.famnames_to_degree( famnames text[], p_degversion int ) RETURNS int[] AS $f$
-        -- Example: select om.famnames_to_degree( '{cc0,cc-by-nc,cc by}'::text[] , 2);
+CREATE FUNCTION om.famname_to_degree( famnames text[], p_degversion int ) RETURNS int[] AS $f$
+        -- Example: select om.famname_to_degree( '{cc0,cc-by-nc,cc by}'::text[] , 2);
 	WITH lst AS (SELECT unnest($1) as fname)
 	SELECT array_agg(  om.faminfo_to_degree(lf.fam_info,p_degversion)  )
 	FROM lst LEFT JOIN om.license_families lf ON om.famname_format(fname)=fam_name;
+$f$ LANGUAGE sql IMMUTABLE;
+CREATE FUNCTION om.famname_to_degree( famname text, p_degversion int ) RETURNS int AS $f$
+	SELECT (om.famname_to_degree( array[$1], $2))[1]; 
 $f$ LANGUAGE sql IMMUTABLE;
 
 
@@ -298,16 +301,17 @@ CREATE FUNCTION om.lic_to_info(int) RETURNS JSON AS $f$
 $f$ LANGUAGE sql IMMUTABLE;
 
 -- --- --- --- --- --- --- --- --- --- --- --- --- ---
--- SPECIFIC FUNCS, licnameS handlers v1.0 (all tested!)
+-- SPECIFIC FUNCS, licnames (array of) handlers v1.0 (all tested!)
 
-CREATE FUNCTION om.licnames_to_names( varchar[] ) RETURNS varchar[] AS $f$
+CREATE FUNCTION om.licname_to_name( varchar[] ) RETURNS varchar[] AS $f$
+        -- Example: select om.licname_to_name('{cc0 1,apache2}'::text[])
 	WITH lst AS (SELECT unnest($1) as name)
 	SELECT array_agg(lf.lic_name)
 	FROM lst LEFT JOIN om.licenses_full lf ON om.licname_cmp(lf.lic_id_name,lst.name);
 $f$ LANGUAGE sql IMMUTABLE;
 
-CREATE FUNCTION om.licnames_to_ids( text[] ) RETURNS int[] AS $f$
-        -- Example: select om.licnames_to_ids('{cc0 1,apache2}'::text[])
+CREATE FUNCTION om.licname_to_id( text[] ) RETURNS int[] AS $f$
+        -- Example: select om.licname_to_id('{cc0 1,apache2}'::text[])
 	WITH lst AS (SELECT unnest($1) as name)
 	SELECT array_agg(lf.lic_id)
 	FROM lst LEFT JOIN om.licenses_full lf ON om.licname_cmp(lf.lic_id_name,lst.name);
