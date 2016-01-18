@@ -79,7 +79,13 @@ SELECT om.licqts_calc('{"CC-by3":2,"CC-by2":3,"CC by sa3":5,"CC-BY v4":15}'::jso
 The input of *average report* functions are key-value pairs with valid names as keys and "license quantities" (ex. number of documents with same license) as values.
 
 ## Basic webservices 
-... php example ...
+All the examples can adpt pretty REST syntax using Apache2's `.htaccess` file or another HTTP server strategy. Below using the [PHP driver](./src/php) to illustrate [OpenURL style](https://en.wikipedia.org/wiki/OpenURL) for webservice calling.
+
+ 1. `ws.php?families=cc-by;cc-by-nc;cc0;cc-by;cc-by-sa;cc0;cc-by-nd;cc0&degvers=2` returns the same as `ws.php?cmd=famqts_calc&list=...`  or SQL's `SELECT om.famqts_calc( '{cc-by,cc-by-nc,cc0,cc-by,cc-by-sa,cc0,cc-by-nd,cc0}'::text[] , 2)`
+ 
+ 2. `ws.php?licenses=cc-by2;cc-by-nc3;cc0,cc-by2;cc-by-sa3;cc0,cc-by2;cc0&degvers=2` returns the same as `SELECT om.licqts_calc( '{cc-by2,cc-by-nc3,cc0,cc-by2,cc-by-sa3,cc0,cc-by2,cc0}'::text[] , 2)`
+ 
+ 3. `ws.php?method=licname_to_name&list=cc-by2;cc-by-nc3;cc0,cc-by2;cc-by-sa3` returns the same as `SELECT om.licname_to_name( '{cc-by2,cc-by-nc3,cc0,cc-by2,cc-by-sa3}'::text[])` ... The `method` parameter can be the name of any `om.lic*()` or `om.fam*()` [SQL functions](./src/ini.sql). 
 
 ## Pretty report services
 ... php example ...
