@@ -88,9 +88,16 @@ The natural insterface is POST JSON request, but some GET variations are offered
  3. `ws.php?method=licname_to_name&list=cc-by2;cc-by-nc3;cc0,cc-by2;cc-by-sa3` returns the same as `SELECT om.licname_to_name( '{cc-by2,cc-by-nc3,cc0,cc-by2,cc-by-sa3}'::text[])` ... The `method` parameter can be the name of any `om.lic*()` or `om.fam*()` [SQL functions](./src/ini.sql). 
 
 ## Pretty report services
-... php example ...
 
-![ACME docs report, illustration #1](_doc/report-illustr1.png)
+For final users, the JSON, numbers or tables are not pretty. Communication about *openness degree of a set of documents* (or any other type of licensed work) must be simple and illustrative, emphasizing the different results, about general average and about contextual average, because there are qualitative distinctions in the numbers of each context.
+
+![ACME docs report, illustration 1](_doc/report-illustr1.png)
+
+A typical report must show a pie chart of the distribution of the elements in each scope, the version of the *openness degree scale* used in the report, the general *openness degree average* of the set, and *openness degree averages* of each scope. Standard colors and icons also helps to compare and fastly understand the results. The standard report text also need some multilingual support.
+
+![demo, reports illustration 2](_doc/report-illustr2-620px.png)
+
+The [demo](src/php/demo.php) shows a more complete contextualization, use of box-report interface, and use of the service parameters for AJAX contexts.
 
 # Links and references
 

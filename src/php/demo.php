@@ -38,7 +38,19 @@
 			'CC-BY':	14,	
 			'CC-BY-NC-ND':	3
 			}
+		},
+		{ xid: 'acme1'
+		 ,title: 'ACME docs 2013' 
+		 ,msg_pt: "xx pt licenças default utilizadas pelas ... #stdDev# ... revistas são #RELAT#. #STDREPORT#"
+		 ,msg_en: "xx en licenses default utilizadas pelas ... #stdDev# ... revistas são #RELAT#. #STDREPORT#"
+		 ,lst_type: 'families'
+		 ,lst: {  // SCIELO DEFAULT LICENSE FAMILIES
+			'CC-BY-NC':	83,
+			'CC-BY':	14,	
+			'CC-BY-NC-ND':	3
+			}
 		}
+
 	];
 
 
@@ -85,10 +97,10 @@
 		    case 'exemp':
 			var exIdx = this.exemp.substr(-1, 1);
 			chg_byLang(this.lang0, exIdx);
-			$('#p_id'). 	val(exemplos[exIdx].xid);
-			$('#p_title'). 	val(exemplos[exIdx].title);
-			$('#p_lst_type').val(exemplos[exIdx].lst_type);
-			$('#p_lst'). 	val('OLA! '+exIdx);
+			$('#p_id'). 	  val(exemplos[exIdx].xid);
+			$('#p_title'). 	  val(exemplos[exIdx].title);
+			$('#p_lst_type'). val(exemplos[exIdx].lst_type);
+			$('#p_lst').	  val( Object.keys(exemplos[exIdx].lst).join() );
 			return true;
 
 		    default:
@@ -192,7 +204,7 @@
 		      <option value="ex1" selected="selected">SciELO-BR profile</option>
 		</optgroup>
 		<optgroup label="Fake (demo)">
-		      <option value="ex2">xxxx</option>
+		      <option value="ex2">ACME docs 2013</option>
 		      <option value="ex3">yyyy</option>
 		</optgroup>
 		<!-- option value="exP">PERSONALIZADO</option -->

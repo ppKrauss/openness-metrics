@@ -1,0 +1,24 @@
+table.ometrics {
+    border: 2px solid #333;
+}
+table.ometrics tr:first-child td:first-child img:first-child {
+	cursor: pointer;
+}
+
+table.ometrics td.ometrics-avg {
+	text-align: center;
+	background-color: #D0D0D0;
+}
+table.ometrics td.ometrics-od {
+	text-align: center;
+	background-color: #E0FFD0;
+}
+table.ometrics td.ometrics-oa {
+	text-align: center;
+	background-color: #F0F090;
+}
+table.ometrics td.ometrics-rt {
+	text-align: center;
+	background-color: #F59090;
+}
+
