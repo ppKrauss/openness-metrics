@@ -90,6 +90,8 @@ The natural insterface is POST JSON request, but some GET variations are offered
 ## Pretty report services
 ... php example ...
 
+![ACME docs report, illustration #1](_doc/report-illustr1.png)
+
 # Links and references
 
 * Open Access Organizations
