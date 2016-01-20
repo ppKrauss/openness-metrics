@@ -103,7 +103,7 @@ The [demo](src/php/demo.php) shows a more complete contextualization, use of box
 
 ![demo, reports illustration 3 ](_doc/report-illustr3-680px.png)
 
-The *demo* also illustrates a real measure, of 2015's certified (Seal) DOAJ journals, by its "default licenses" &mdsh; as in the DOAJ's database of 5196 journals that declarated its licenses.
+The *demo* also illustrates a real measure, of 2015's certified (Seal) DOAJ journals, by its "default licenses" &mdash; as in the DOAJ's database of 5196 journals that declarated its licenses.
 
 # Links and references
 
