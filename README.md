@@ -101,6 +101,10 @@ A typical report must show a pie chart of the distribution of the elements in ea
 
 The [demo](src/php/demo.php) shows a more complete contextualization, use of box-report interface, and use of the service parameters for [AJAX](https://en.wikipedia.org/wiki/Ajax_(programming)) contexts.
 
+![demo, reports illustration 3](_doc/report-illustr3-680px.png)
+
+The *demo* also illustrates a real measure, of 2015's certified (Seal) DOAJ journals, by its "default licenses" &mdsh; as in the DOAJ's database of 5196 journals that declarated its licenses.
+
 # Links and references
 
 * Open Access Organizations
