@@ -79,7 +79,7 @@ function jsonCsv_to_sql(&$items, &$projects, &$db, $SEP = ',', $nmax = 0, $verbo
 			$file = "$folder/$pack[path]";
 			$h = fopen($file,'r');
 			while( $h && !feof($h) && (!$nmax || $n<$nmax) )
-			  if (($lin0=$lin = fgetcsv($h,0,$SEP)) && $n++>0) {
+			  if (($lin0=$lin = fgetcsv($h,0,$SEP)) && $n++>0  && isset($lin[0])) {
 				$jsons = array_slice($lin,$nsql);
 				$types = array_slice($json_types,$nsql);
 				for($t_i=0; $t_i<count($types); $t_i++)
@@ -99,12 +99,12 @@ function jsonCsv_to_sql(&$items, &$projects, &$db, $SEP = ',', $nmax = 0, $verbo
 				} else // implicit bind (by array order and no datatype parsing)
 					$ok = $stmt->execute( array_merge($sqls,array($info)) );
 				if (!$ok) {
-					$OUT_report.= "\n ---- ERROR (at line-$n with error info) ----\n";
+					$OUT_report.= "\n ---- ERROR (at csv line-$n (rec. $n2) with error info) ----\n";
 					$OUT_report.= var_export($lin0, true);
 					$OUT_report.= var_export($stmt->errorInfo(),true);
 					return array(-1,0,$OUT_report); //die("\n");
 				} else $n2++;
-			  } elseif ($nsql>0 && count($sql_fields) && isset($lin) && count($lin) && $lin!=array()) {
+			  } elseif ($nsql>0 && count($sql_fields) && isset($lin) && count($lin) && $lin!=array() && isset($lin[0])) {
 				//debug print "\n-pk-$n2...0-$nsql \nlin=".count($lin);print_r($lin);
 				$lin_check = fields_to_parts( array_slice($lin,0,$nsql) );
 				if ($sql_fields!= $lin_check){
@@ -112,7 +112,7 @@ function jsonCsv_to_sql(&$items, &$projects, &$db, $SEP = ',', $nmax = 0, $verbo
 					var_dump($sql_fields);
 					die("\n --- ERROR: CSV header-basic not matches SQL/datapackage field names ---\n");
 				}
-			  }
+			  } //else print "\n-- !WARNING 2 at omLib.php, jsonCsv_to_sql(), n=$n\n";
 			$OUT_report.= " $n lines scanned, $n2 used.";
 			$N+=$n; $N2+=$n2;
 			unset($ds[$pack['path']]);

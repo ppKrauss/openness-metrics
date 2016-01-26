@@ -297,7 +297,7 @@ CREATE FUNCTION om.famqts_calc( JSON, int default 2 ) RETURNS JSON AS $f$
 		  SELECT key as name, value::int as qt
 		  FROM json_each_text(  om.nameqts_std( $1 , true)  )
 		) SELECT COALESCE(fam_id,1) as id,
-			COALESCE(fam_name,'(unknowed)') as name,
+			COALESCE(fam_name,'(unknown)') as name,
 			COALESCE(fam_info->>'scope','(err)') as scope,
 			lst.qt,   tt.tot,
 			om.faminfo_to_degree(fam_info,$2) as deg,
@@ -346,7 +346,7 @@ CREATE or replace FUNCTION om.licqts_calc( JSON, int default 2 ) RETURNS JSON AS
 		  SELECT key as name, value::int as qt
 		  FROM json_each_text(  om.nameqts_std( $1 , true)  )
 		) SELECT COALESCE(lic_id,1) as id,
-			COALESCE(lf.lic_id_name,'(unknowed)') as name,
+			COALESCE(lf.lic_id_name,'(unknown)') as name,
 			COALESCE(lf.fam_name,'(unassoc)') as family,
 			lst.qt,   tt.tot,
 			(100.0*lst.qt::float/tt.tot::float) as perc
@@ -569,11 +569,11 @@ $$ LANGUAGE plpgsql;
 -- STD INSERTS
 
 INSERT INTO om.license_families(fam_name,fam_info) VALUES
-  ('(unknowed)', '{"scope":"(err)","sort":-990,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB)
+  ('(unknown)', '{"scope":"(err)","sort":-990,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB)
   ,('(other)',    '{"scope":"(err)","sort":-995,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB)
   ,('(unassoc)',  '{"scope":"(err)","sort":-999,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB)
 ;
-SELECT om.licenses_upsert('(unknowed)','','(unknowed or not-checked license)','(unknowed)',NULL,'{"is_ref":2}'::JSONB);
+SELECT om.licenses_upsert('(unknown)','','(unknown or not-checked license)','(unknown)',NULL,'{"is_ref":2}'::JSONB);
 SELECT om.licenses_upsert('(other)','','(other license, can be change with updates)','(other)',NULL,'{"is_ref":0}'::JSONB);
 
 --------------------------------
