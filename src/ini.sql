@@ -568,13 +568,13 @@ $$ LANGUAGE plpgsql;
 --------------------------------
 -- STD INSERTS
 
-INSERT INTO om.license_families(fam_name,fam_info) VALUES
-  ('(unknown)', '{"scope":"(err)","sort":-990,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB)
-  ,('(other)',    '{"scope":"(err)","sort":-995,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB)
-  ,('(unassoc)',  '{"scope":"(err)","sort":-999,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB)
+INSERT INTO om.license_families(fam_name,fam_info) VALUES  -- fake families for error messages
+  ('(unknown)', '{"scope":"(err)","sort":-990,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB) -- license unkonwn for document 
+  ,('(other)',    '{"scope":"(err)","sort":-995,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB) -- license unknown for database
+  ,('(unassoc)',  '{"scope":"(err)","sort":-999,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB) -- family unknown for database
 ;
-SELECT om.licenses_upsert('(unknown)','','(unknown or not-checked license)','(unknown)',NULL,'{"is_ref":2}'::JSONB);
-SELECT om.licenses_upsert('(other)','','(other license, can be change with updates)','(other)',NULL,'{"is_ref":0}'::JSONB);
+SELECT om.licenses_upsert('(unknown)','','(unknown or not-checked license)','(unknown)',NULL,'{"is_ref":2}'::JSONB); -- fake, to reoprt error
+SELECT om.licenses_upsert('(other)','','(other license, update your license-database)','(other)',NULL,'{"is_ref":0}'::JSONB); -- fake
 
 --------------------------------
 --------------------------------
