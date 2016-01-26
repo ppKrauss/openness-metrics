@@ -93,7 +93,7 @@ The natural insterface is POST JSON request, but some GET variations are offered
 
 ## Pretty report services
 
-For final users, the JSON, numbers or tables are not pretty. Communication about *openness degree of a set of documents* (or any other type of licensed work) must be simple and illustrative, emphasizing the different results, about general average and about contextual average, because there are qualitative distinctions in the numbers of each context.
+For final users, the JSON, numbers or tables are not pretty. Communication about *openness degree of a set of documents* (or any other type of licensed work) must be simple and illustrative, emphasizing the different results, about general average and about contextual average, because there are qualitative distinctions in the numbers of each context. It is a typical [data visualization](https://www.wikidata.org/wiki/Q6504956) problem, with (here) automated solutions.
 
 ![ACME docs report, illustration 1](_doc/report-illustr1.png)
 
