@@ -14,7 +14,7 @@ $verbose = 1; // 0,1 or 2
 // CONFIGS: (complement to omLib)
 	$projects = [
 		'licences'=>		'/home/peter/gits/licenses',
-		'openness-metrics'=>	'/var/www/html/openness-metrics'
+		'openness-metrics'=>	'/home/peter/gits/openness-metrics'
 	];
 	$reini = true;  // re-init all SQL structures of the project (drop and refresh schema)
 
