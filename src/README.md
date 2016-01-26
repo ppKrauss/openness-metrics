@@ -1,5 +1,6 @@
 # Implementations
-Different servers and languages can be used as "*proxy* to the SQL resolution core". 
+Different servers and languages can be used as "*proxy* to the SQL resolution core". The reference-implementation is *PostgreSQL 9.4 [database](https://en.wikipedia.org/wiki/Relational_database_management_system) + PHP5 [proxy](https://en.wikipedia.org/wiki/Proxy_pattern) + Apache2 [webserver](https://en.wikipedia.org/wiki/Web_server) and [rewrite engine](https://en.wikipedia.org/wiki/Rewrite_engine)*, but we can replace any of this three components by other preferred ones.
+The ideal (consume dream) is *PostgreSQL 9.5 + Nginx + NodeJS*.
 
 # endpoints
 There are two approaches to handle methods at endpoints,
@@ -27,7 +28,7 @@ Syntax for basic GET usage: `endpoint_method/param1=val1;param2=val2;...` or `en
  * famqts_calc: 
 
 
-## Apache
+## Apache server
 Apache2 `.htaccess`, on the VirtualHost's `DocumentRoot` directory of the mapped `ServerName` (`<subdomain>.<domain>`), add the folowing `.htaccess` file, for an endpoint syntax option:
 
 ```
@@ -42,7 +43,17 @@ RewriteRule . - [L]
 RewriteRule ^((?:lic|fam)(?:name_format|name_to_name|name_to_info|qts_calc)|famname_to_id)(?:/(.+))?(?:\?(.+))?$     index.php?cmd=$1&$2&params=$3 [L]
 ```
 
-## Nginx
+## Nginx server
 ?
 
+## PostgreSQL 9.4+ database ##
+The [ini.sql](ini.sql) and database behaviour was tunned to pg9.4+, so, **no other option in mind**.
 
+## PHP proxy ##
+The referemce-implementation, for use with Apache2.
+
+## Python proxy ##
+... another taste ...
+
+## NodeJS proxy ##
+... a good option... 
