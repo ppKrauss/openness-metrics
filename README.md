@@ -81,6 +81,8 @@ SELECT om.licqts_calc('{"CC-by3":2,"CC-by2":3,"CC by sa3":5,"CC-BY v4":15}'::jso
 The input of *average report* functions are key-value pairs with valid names as keys and "license quantities" (ex. number of documents with same license) as values.
 
 ## Basic webservices
+For [webservice](https://www.wikidata.org/wiki/Q193424) implementation options and restrictions, see the [scr/README](./src/README.md).
+
 The natural insterface is POST JSON request, but some GET variations are offered.  All the examples can be adpted to pretty REST syntax using Apache2's `.htaccess` file or another HTTP server configuration. Below using the [PHP driver](./src/php) to illustrate [OpenURL style](https://en.wikipedia.org/wiki/OpenURL) for webservice calling.
 
  1. `ws.php?families=cc-by;cc-by-nc;cc0;cc-by;cc-by-sa;cc0;cc-by-nd;cc0&degvers=2` returns the same as `ws.php?cmd=famqts_calc&list=...`  or SQL's `SELECT om.famqts_calc( '{cc-by,cc-by-nc,cc0,cc-by,cc-by-sa,cc0,cc-by-nd,cc0}'::text[] , 2)`
