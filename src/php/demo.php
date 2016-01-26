@@ -11,12 +11,13 @@
 	<script src="../assets/etc_lib.js"></script><!-- g_state -->
 
 	<script>
+//ex. CC-BY=2604, CC-BY-SA=112, CC-BY-NC-ND=1162, CC-BY-NC=938, CC-BY-NC-SA=333, CC-BY-ND=47
 
 	var exemplos = [  // parametros set_OpenMetricsBox_byFamList()
 		{ xid: 'DOAJ2'
 		 ,title: 'DOAJ Seal 2015' 
 		 ,msg_pt: "pt As licenças default utilizadas pelas ... #stdDev# ... revistas são #RELAT#. #STDREPORT#"
-		 ,msg_en: "en licenses default utilizadas pelas ... #stdDev# ... revistas são #RELAT#. #STDREPORT#"
+		 ,msg_en: "Default licenses used by certified DOAJ jounals ... #stdDev# ... #RELAT#. #STDREPORT#"
 		 ,lst_type: 'families'
 		 ,lst: {  // DOAJ DEFAULT LICENSE FAMILIES
 			'CC BY':	2604,
@@ -53,16 +54,7 @@
 		}
 	];
 
-	g_state.onChangeHub = function (id,obj,params) { 
-		switch(id) {  // EACH STATE-CHANGE (by DOM id)
-		    case 'lang0':
-		    case 'degvers':
-		    case 'exemp':
-			return $(obj).val();
-		    default:
-			return null;
-		}
-	};
+
 	var langMsg = { // lang-template variables and its possible values
 		'pt':{langlabel:'Idioma', 	degvers:'Métrica de abertura, versão',
 			exemp:'Exemplos', 	thead: 'Medida do grau de abertura de um conjunto de obras pelas suas licenças',
@@ -84,6 +76,16 @@
 			$('#p_msg')	.val(exemplos[exIdx]['msg_'+lang]);
 	}
 
+	g_state.onChangeHub = function (id,obj,params) { 
+		switch(id) {  // EACH STATE-CHANGE (by DOM id)
+		    case 'lang0':
+		    case 'degvers':
+		    case 'exemp':
+			return $(obj).val();
+		    default:
+			return null;
+		}
+	};
 	g_state.afterChangeHub = function (id,obj,params) { 
 		switch(id) {  // EACH STATE-CHANGE (by DOM id)
 		    case 'lang0':
@@ -99,7 +101,7 @@
 			$('#p_id'). 	  val(exemplos[exIdx].xid);
 			$('#p_title'). 	  val(exemplos[exIdx].title);
 			$('#p_lst_type'). val(exemplos[exIdx].lst_type);
-			$('#p_lst').	  val( keyVal_toString(exemplos[exIdx].lst) );
+			$('#p_lst').	  val( keyVal_toString(exemplos[exIdx].lst, ', ') );
 			return true;
 
 		    default:
@@ -121,17 +123,10 @@
 			});
 		} // for optional layout see http://jsfiddle.net/Gajotres/xFPFH/
 
+		$('#selectedContent').load('ws_fake1.htm');
+
 	}); // onload
 
-	function boxToggle(id) {
-		var $obj = $('#'+id);
-		var $img = $obj.find('tr:first td:first img:first'); //.attr('src',minmax? '');
-		if ( $obj.find('tr.ometrics-report').toggle().is(':visible') )
-			src  = $img.attr('src').replace("maximize", "minimize");
-		else
-			src  = $img.attr('src').replace("minimize", "maximize");
-		$img.attr('src',src);
-	}
 	</script>
   <style>
 	h2 {
@@ -166,16 +161,17 @@
 </head>
 <body>
 <!--
+http://jsfiddle.net/Gajotres/xFPFH/
  http://localhost/openness-metrics/src/php/demo3.php?degvers=1
 -->
-
+PHP: falta get state
 <h2>Medida do grau de abertura de um conjunto de obras pelas suas licenças</h2>
 
 <form action="#">
 
 <table border="0" width="99%">
 <tr>
-<td width="30%">
+<td width="30%" valign="top">
    <fieldset>
     <label for="lang0">Idioma</label>
     <select name="lang0" id="lang0">

@@ -46,14 +46,26 @@ var g_state = {
 	// o ideal é armazenar em data-dom o valor padronizado. O estado pode ser uma string ou um json.
 };
 
+/// INTERFACE LIB
+
+function boxToggle(id) { // box icon minimize/maximize
+	var $obj = $('#'+id);
+	var $img = $obj.find('tr:first td:first img:first'); //.attr('src',minmax? '');
+	if ( $obj.find('tr.ometrics-report').toggle().is(':visible') )
+		src  = $img.attr('src').replace("maximize", "minimize");
+	else
+		src  = $img.attr('src').replace("minimize", "maximize");
+	$img.attr('src',src);
+}
+
 /// UTIL LIB 
 
 
-function keyVal_toString(lst) {
+function keyVal_toString(lst,sep) {
 	var s=[];
 	for(var i in lst)
  		s.push(i+'='+lst[i])
-	return s.join();
+	return (sep!==undefined)? s.join(sep): s.join();
 }
 
 
