@@ -9,7 +9,7 @@ There are two approaches to handle methods at endpoints,
 
 For the approach-2, Apache and Nginx are the two most common open source web servers in the world (together they are serving over 50% of traffic on the Internet).
 
-Syntax `endpoint_method/param1=val1;param2=val2;...` or `endpoint_method?param1=val1&param2=val2&...` Main endpoints and its parameters,
+Syntax for basic GET usage: `endpoint_method/param1=val1;param2=val2;...` or `endpoint_method?param1=val1&param2=val2&...` Main endpoints and its (GET or JSON POST) parameters,
 
 * License resolution endpoints:
 
