@@ -10,23 +10,27 @@ There are two approaches to handle methods at endpoints,
 
 For the approach-2, Apache and Nginx are the two most common open source web servers in the world (together they are serving over 50% of traffic on the Internet).
 
-Syntax for basic GET usage: `endpoint_method/param1=val1;param2=val2;...` or `endpoint_method?param1=val1&param2=val2&...` Main endpoints and its (GET or JSON POST) parameters,
+Syntax for basic GET usage: `endpoint_method/outmode/param1=val1;param2=val2;...` or `endpoint_method?param1=val1&param2=val2&...` Main endpoints and its (GET or JSON POST) parameters,
 
-* License resolution endpoints:
+* License resolution endpoints (cmd):
 
  * licname_format:
  * licname_to_name:
  * licname_to_info:
  * licqts_calc:
 
-* Family resolution endpoints:
+* Family resolution endpoints (cmd):
 
  * famname_format:
  * famname_to_name:
  * famname_to_id:
  * famname_to_info:
- * famqts_calc: 
+ * famqts_calc:
 
+* Output variation by endpoint (outmode)
+
+  * *js*: JSON default
+  * *htm*: for jQuery (load) response.
 
 ## Apache server
 Apache2 `.htaccess`, on the VirtualHost's `DocumentRoot` directory of the mapped `ServerName` (`<subdomain>.<domain>`), add the folowing `.htaccess` file, for an endpoint syntax option:
@@ -56,4 +60,4 @@ The referemce-implementation, for use with Apache2.
 ... another taste ...
 
 ## NodeJS proxy ##
-... a good option... 
+... a good option...
