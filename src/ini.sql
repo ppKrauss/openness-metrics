@@ -260,20 +260,33 @@ $f$ LANGUAGE sql IMMUTABLE;
 
 
 CREATE or replace FUNCTION om.scopeqts_calc( JSON[], int default 2 ) RETURNS JSON AS $f$
-	-- input by [{scope,deg,perc}]
+	-- internal use
+	-- OOPS: _valid only make sense in the scope-error, not exist non-valid in other scopes
+	-- input by [{scope,deg,perc,is_valid}]  perc is a global_perc (distrib to err) 
 	SELECT array_to_json(array_agg( row_to_json(t3) ))
 	FROM (
 		WITH t AS ( SELECT unnest($1) as rec)
-		SELECT *, 100.0*avg_global/perc_global as avg_scope -- avgdeg
+		SELECT *, 
+			CASE WHEN is_valid_tot=n_items THEN 1 ELSE 0 END as is_valid
+			,100.0*deg_tot/perc as deg_avg -- avg of deg
+			,100.0*deg_valid_tot/perc_valid as deg_avg_valid -- avg of deg_valid
 		  FROM (
-			SELECT scope, sum(perc) as perc_global, sum(deg*perc/100.0) as avg_global
-			FROM t, json_to_record(rec) d(scope text, deg float, perc float)
+			SELECT scope, 
+				sum(perc) as perc, -- global
+				sum(perc_valid) as perc_valid,
+				sum(is_valid) as is_valid_tot,
+				count(*) as n_items,
+				sum(deg*perc/100.0) as deg_tot,
+				sum(deg*perc_valid/100.0) as deg_valid_tot
+			FROM t, json_to_record(rec) d(scope text, deg float, perc float, perc_valid float, is_valid int)
 			GROUP BY 1
 		) t2
 	) t3;
 $f$ LANGUAGE sql IMMUTABLE;
 
+
 CREATE or replace FUNCTION om.scopeqts_calc( JSON, int default 2 ) RETURNS JSON AS $f$
+-- overhead proxy 
 	WITH t AS ( SELECT json_array_elements($1) as rec)
 	SELECT om.scopeqts_calc( array_agg(rec), $2 ) FROM t;
 $f$ LANGUAGE sql IMMUTABLE;
@@ -285,25 +298,32 @@ CREATE FUNCTION om.famqts_calc( JSON, int default 2 ) RETURNS JSON AS $f$
    -- Example: SELECT om.famqts_calc( '{"CC-by":3,"CC by sa":5,"CC-BY":15,"CC-BY":5}'::json , 2);
    SELECT row_to_json(t2) FROM (
 	SELECT 'family' as aggtype,
-	       max(tot) as qt_tot,
 	       $2 as deg_version,
-	       sum(CASE WHEN t.id=1 THEN 0 ELSE 1 END) as n_valids,
-	       count(*) as n,
-	       sum(t.deg::float*t.perc/100.0) as deg_avg,
-	       om.scopeqts_calc(  array_agg(json_object(array['scope',t.scope,'deg',deg::text,'perc',perc::text]))  ) as scopes,
+	       sum(is_valid) as n_valid,
+       	       count(*) as n,
+	       max(qt_tot_global) as qt_tot,
+	       sum(qt*is_valid) as qt_tot_valid,
+	       sum(t.deg::float*t.perc_global/100.0) as deg_avg,
+	       sum(t.deg*qt*is_valid)::float/sum(qt*is_valid)::float as deg_avg_valid,
+	       om.scopeqts_calc(  array_agg(json_object(
+		array['scope',t.scope, 'deg',deg::text, 'perc',perc_global::text,
+			'perc_valid',(100.0*qt::float/sum(qt*is_valid)::float)::text, 'is_valid',is_valid::text]
+	       ))  ) as scopes,
 	       array_agg( row_to_json(t) ) as list  -- each family
 	FROM (
 		WITH lst AS (
 		  SELECT key as name, value::int as qt
 		  FROM json_each_text(  om.nameqts_std( $1 , true)  )
 		) SELECT COALESCE(fam_id,1) as id,
+			COALESCE(CASE WHEN fam_id>4 THEN 1 ELSE 0 END,0) as is_valid,
 			COALESCE(fam_name,'(unknown)') as name,
 			COALESCE(fam_info->>'scope','(err)') as scope,
-			lst.qt,   tt.tot,
+			lst.qt,
+			tt.qt_tot_global,
 			om.faminfo_to_degree(fam_info,$2) as deg,
-			(100.0*lst.qt::float/tt.tot::float) as perc
+			(100.0*lst.qt::float/tt.qt_tot_global::float) as perc_global
 		  FROM om.license_families lf RIGHT JOIN lst ON lst.name=lf.fam_name,
-			(select sum(qt::int)::float as tot FROM lst) tt
+			(select sum(qt)::float as qt_tot_global FROM lst) tt
 		  ORDER BY COALESCE(lf.kx_sort,-990) DESC
 	) t
    ) t2;
@@ -569,10 +589,14 @@ $$ LANGUAGE plpgsql;
 -- STD INSERTS
 
 INSERT INTO om.license_families(fam_name,fam_info) VALUES  -- fake families for error messages
+  -- CONVENTION: fam_id>4, 1..4 are reserved for error codes
   ('(unknown)', '{"scope":"(err)","sort":-990,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB) -- license unkonwn for document 
   ,('(other)',    '{"scope":"(err)","sort":-995,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB) -- license unknown for database
   ,('(unassoc)',  '{"scope":"(err)","sort":-999,"degreev1":null,"degreev2":null,"degreev3":null}'::JSONB) -- family unknown for database
+  ,('(DELETE-ME)',  '{"scope":"(err)","sort":-999}'::JSONB) -- to fam_id reserve
 ;
+DELETE FROM om.license_families WHERE fam_name='(DELETE-ME)';
+
 SELECT om.licenses_upsert('(unknown)','','(unknown or not-checked license)','(unknown)',NULL,'{"is_ref":2}'::JSONB); -- fake, to reoprt error
 SELECT om.licenses_upsert('(other)','','(other license, update your license-database)','(other)',NULL,'{"is_ref":0}'::JSONB); -- fake
 
