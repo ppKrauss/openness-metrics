@@ -1,3 +1,5 @@
+"openness" or "permissiveness" or ... the name can be changed, is a branding matter ([for concepts, discussion here](https://d.wifo.org/t/license-families-and-license-openness-metrics/190)).
+
 ## How much open is it?
 This project is an initiative to shift the traditional conversations about [Open access](https://en.wikipedia.org/wiki/Open_access), from “All here is open access?”, “How to compare open things?”... to "How much open is this set?",  and transform consensual answers into concrete things!
 
